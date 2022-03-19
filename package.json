@@ -1,0 +1,15 @@
+{  
+  "name": "algos",
+  "version": "1.0.0",
+  "description": "Karatsuba integer multiplication",
+  "main": "integerMultiply.js",
+  "scripts": {
+    "test": "jest test --watch",
+    "start": "node mergesort"
+  },
+  "author": "SR",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "21.2.1"
+  }
+}
