@@ -4,14 +4,14 @@
 */
 
 //Time Complexity: O(y) where y is the second argument
-function multiply(x, y) {
+const multiply = (x, y) => {
 	
 	//y will be decrementing each time, until it reaches 0
 	//0 multiplied with anything gives 0
 	if (y == 0)
 		return 0;   //base case, ends the loop
 
-	//Add x to itself each time, for as many times as y remains above 0
+	//Add x to itself for as many loops as y remains above 0
 	if (y > 0 )
 		return (x + multiply(x, y-1));	//x input remains same, decrement y
 
@@ -21,7 +21,12 @@ function multiply(x, y) {
 
 }
 
-console.log("Multiply Two Integers...");
-console.log(multiply(5, 11));
-console.log(multiply(5, -11));
+let x = 5;
+let y = 11;
+let z = -11;
+
+console.log("Multiplying " + x + " with " + y);;
+console.log(multiply(x, y));
+console.log("Multiplying " + x + " with " + z);;
+console.log(multiply(x, z));
 

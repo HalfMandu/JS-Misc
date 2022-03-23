@@ -1,4 +1,4 @@
-{  
+{
   "name": "algos",
   "version": "1.0.0",
   "description": "Karatsuba integer multiplication",
@@ -11,5 +11,8 @@
   "license": "ISC",
   "devDependencies": {
     "jest": "21.2.1"
+  },
+  "dependencies": {
+    "performance": "^1.4.0"
   }
 }
