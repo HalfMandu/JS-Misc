@@ -1,5 +1,6 @@
 /* 
 * 	Merge Sort - JS Implementation - nlogn 
+*	Stephen Rinkus
 */
 
 //Input size: N (number is of power 2)

@@ -1,5 +1,6 @@
 /* 
-* Multiply two integers using recursion
+*	Multiply two integers using recursion -- O(logn)
+*	Stephen Rinkus
 */
 
 //Time Complexity: O(y) where y is the second argument

@@ -1,3 +1,7 @@
+/* 
+*	Karatsuba - O(n^log3) ~ O(n^1.585)
+*	Stephen Rinkus
+*/
 
 const split = (num) => {
 
