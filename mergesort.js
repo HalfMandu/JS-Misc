@@ -12,8 +12,10 @@
 
 const { performance } = require('perf_hooks');
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//Main
 
-//combine left and right sub arrays
+//combine left and right sub arrays, maintaining linear runtime 
 const merge = (left, right) => {
 
 	out = [];
@@ -25,9 +27,9 @@ const merge = (left, right) => {
 		} else {
 			out.push(right.shift());
 		}
-		console.log("currOut: " + out);
 	}
-
+	
+	//could be elements remaining...just concat because by this stage, they are sorted: out < left < right 
 	return [...out, ...left, ...right];
 
 }
@@ -36,53 +38,39 @@ const merge = (left, right) => {
 const mergeSort = (arr) => {
 
 	let half = arr.length / 2;
-	//const half = Math.floor(unsortedArray.length / 2);
 
 	//base case to halt recursion
 	if (arr.length < 2) {
 		return arr;
 	}
 
-	//divide step: cut the array in half...the right half remains in arr
+	//divide step: chop the array in half...the right half remains in arr
 	let left = arr.splice(0, half);
 
 	//conquer step: two recursive calls, one for each half
 	return merge(mergeSort(left), mergeSort(arr));
 }
 
-console.log("Begining Mergesort");
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//Driver
+
 const arr = [3, 9, 1, 12];
-console.log("arr before sort: " + arr);
+console.log("Array before mergeSort: " + arr);
 let startTime = performance.now();
-console.log("final sorted array: " + mergeSort(arr));
+let arrSorted = mergeSort(arr);
 let endTime = performance.now();
+console.log("Array after mergeSort: " + arrSorted);
 console.log(`quickSort() took ${endTime - startTime} milliseconds`);
-console.log("Done.");
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
+//Notes
+
 //OLDER SYNTAX, before ES6
 
-const merge2 = (left, right) => {
-
-	let resultArray = [], leftIndex = 0, rightIndex = 0;
-
-	// We will concatenate values into the resultArray in order
-	while (leftIndex < left.length && rightIndex < right.length) {
-		if (left[leftIndex] < right[rightIndex]) {
-			resultArray.push(left[leftIndex]);
-			leftIndex++; // move left array cursor
-		} else {
-			resultArray.push(right[rightIndex]);
-			rightIndex++; // move right array cursor
-		}
-	}
-
-	// We need to concat here because there will be one element remaining
-	// from either left OR the right
-	return resultArray
+	/* return resultArray
 		.concat(left.slice(leftIndex))
 		.concat(right.slice(rightIndex));
-}
+	*/
 
 
 

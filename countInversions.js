@@ -3,6 +3,8 @@
 * 	(Compute the total number of inversions in an Array)
 */
 
+const { performance } = require('perf_hooks');
+
 //recursive call -- takes left and right subarrays, sorts and counts inversions 
 function merge(left, right) {
 
@@ -58,14 +60,17 @@ function mergeSort(obj) {
 }
 
 
-console.log("Begining CountInversions...");
 const arr = [9, 1, 3, 12];
-console.log("Arr: " + arr);
+console.log("Begining Array: " + arr);
+
+let startTime = performance.now();
 let resultObj = mergeSort({ arr: arr, inversionCount: 0 });
+let endTime = performance.now();
+
 console.log("Final Inversion Count: " + resultObj.inversionCount);
 console.log("Final Sorted Array: " + resultObj.arr);
-console.log("Done.");
 
+console.log(`mergeSort() took ${endTime - startTime} milliseconds`);
 
 
 
