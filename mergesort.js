@@ -60,7 +60,7 @@ let startTime = performance.now();
 let arrSorted = mergeSort(arr);
 let endTime = performance.now();
 console.log("Array after mergeSort: " + arrSorted);
-console.log(`quickSort() took ${endTime - startTime} milliseconds`);
+console.log(`mergeSort() took ${endTime - startTime} milliseconds`);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //Notes

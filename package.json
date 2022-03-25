@@ -5,7 +5,7 @@
   "main": "integerMultiply.js",
   "scripts": {
     "test": "jest test --watch",
-    "start": "node countInversions"
+    "start": "node Searches/binarySearch"
   },
   "author": "SR",
   "license": "ISC",
