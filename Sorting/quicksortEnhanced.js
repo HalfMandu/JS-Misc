@@ -11,6 +11,10 @@ const { performance } = require('perf_hooks');
 //Convert txt file to array
 const parseTxtFile = async (csvFile) => {
 
+    const util = require('util');
+    const fs = require('fs');
+    fs.readFileAsync = util.promisify(fs.readFile);
+
     const data = await fs.readFileAsync(csvFile);
     const str = data.toString();
     const lines = str.split('\r\n');
@@ -29,6 +33,7 @@ const parseTxtFile = async (csvFile) => {
 
 //Random whole number, min and max included 
 const getBoundedRandomNumber = (min, max) => {
+	//take a random fraction of the distance between min and max, and add it to min
     return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
@@ -85,7 +90,7 @@ const partition = (arr, left, right) => {
     //finally, put the pivot into its rightful place: the last open spot remaining
     swap(arr, pivotPos, i - 1);
 
-    //send back final (semi-sorted) location of pivot, so quickSort() knows where to cut it
+    //send back final sorted location of pivot, so quickSort knows where to cut it
     return i;
 }
 
@@ -103,7 +108,7 @@ const quickSort = (arr, leftPos, rightPos) => {
     }
 
     //partitionTypes : firstElement, middleElement, randomElement
-    const partitionType = "firstElement";
+    const partitionType = "middleElement";
 
     //all choices will swap with 1st element, allowing partition() to use 1st as pivot
     choosePivot(arr, leftPos, rightPos, partitionType);
@@ -123,10 +128,6 @@ const quickSort = (arr, leftPos, rightPos) => {
 //Driver
 
 let arr = [3, 4, 7, 6, 9, 16, 10, 11, 12, 2, 5, 8, 1, 13, 14, 15];
-
-const util = require('util');
-const fs = require('fs');
-fs.readFileAsync = util.promisify(fs.readFile);
 
 parseTxtFile('./QuickSort_Smaller.txt').then(() => {
     let startTime = performance.now();
