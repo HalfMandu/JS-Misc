@@ -52,7 +52,7 @@ const karatsuba = (int1, int2) => {
     return ac * 10 ** (2 * halfMaxLen) + magic * 10 ** halfMaxLen + bd;     
 };
 
-console.log("starting karatsuba...");
+console.log("Starting karatsuba...");
 
 //console.log(split(1234)); //[ 12, 34 ]
 //console.log(split(12)); //[ 1, 2 ]
@@ -63,13 +63,8 @@ const arg2 = 45;
 
 console.log("Multiplying " + arg1 + " with " + arg2 + " using Karatsuba");
 
-const product = karatsuba(arg1, arg2);   // 
+const product = karatsuba(arg1, arg2);  
 console.log(product);
-
-console.log("finished Karatsuba");
-
-// exports.karatsuba = karatsuba;
-// exports.split = split;
 
 module.exports = {
     karatsuba: karatsuba,
