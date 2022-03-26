@@ -62,18 +62,6 @@ let endTime = performance.now();
 console.log("Array after mergeSort: " + arrSorted);
 console.log(`mergeSort() took ${endTime - startTime} milliseconds`);
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//Notes
-
-//OLDER SYNTAX, before ES6
-
-	/* return resultArray
-		.concat(left.slice(leftIndex))
-		.concat(right.slice(rightIndex));
-	*/
-
-
-
 
 
 

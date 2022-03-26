@@ -61,9 +61,7 @@ const quickSort = (arr, leftPos, rightPos) => {
 ///////////////////////////////////////////////////////////////////////////////////
 //Driver
 
-//let arr = [3, 2, 8, 5];
-// let arr = [3, 8, 2, 5, 1, 4, 7, 6];
-//let arr = [2, 1];
+
 let arr = [3, 4, 7, 6, 9, 16, 10, 11, 12, 2, 5, 8, 1, 13, 14, 15];
 console.log("Initial array : " + arr);
 let startTime = performance.now();

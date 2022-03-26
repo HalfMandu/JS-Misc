@@ -131,7 +131,7 @@ let arr = [3, 4, 7, 6, 9, 16, 10, 11, 12, 2, 5, 8, 1, 13, 14, 15];
 
 parseTxtFile('./QuickSort_Smaller.txt').then(() => {
     let startTime = performance.now();
-    let arrSorted = quickSort(arr, 0, arr.length - 1);
+    let arrSorted = quickSort(result, 0, result.length - 1);
     let endTime = performance.now();
     console.log("Sorted array: " + arrSorted);
     console.log(`quickSort() took ${endTime - startTime} milliseconds`);
@@ -140,3 +140,5 @@ parseTxtFile('./QuickSort_Smaller.txt').then(() => {
 ///////////////////////////////////////////////////////////////////////////////////
 
 exports.quickSort = quickSort;
+
+
