@@ -21,7 +21,6 @@ const parseTxtFile = async (csvFile) => {
     const util = require('util');
     const fs = require('fs');
     fs.readFileAsync = util.promisify(fs.readFile);
-
     const data = await fs.readFileAsync(csvFile);
     const str = data.toString();
     const lines = str.split('\r\n');
@@ -61,10 +60,10 @@ const getMedian = (arr, first, mid, last) => {
 		return last;
 }
 
-//Pivot options: 1st element, middle element, last element, or random element
+//Pivot options: 1st element, middle element, last element, median element, or random element
 const choosePivot = (arr, left, right, pivotType) => {
 
-    let pivotPos = left;  //by default, pivot is first entry in array
+    let pivotPos;  //by default, pivotPos will first entry in array
 	
     //find desired pivot point, then swap with 1st element if needed
     switch (pivotType) {
@@ -95,7 +94,7 @@ const choosePivot = (arr, left, right, pivotType) => {
 ///////////////////////////////////////////////////////////////////////////////////
 //Main
 
-//takes the full array each time, along with the left and right subarray boundaries
+//Takes the full array each time, along with the left and right subarray boundaries
 //partitions the array around a pivot, so that leftside < pivot < rightside
 const partition = (arr, left, right) => {
 
@@ -118,23 +117,17 @@ const partition = (arr, left, right) => {
     return i-1;
 }
 
-//main recursive call
+//Main recursive call
 const quickSort = (arr, leftPos, rightPos) => {
 
-    //base cases, else recursion continues -- is this check necessary?
-    if (arr.array.length < 2) {
-        return arr;
-    }
-
+    //base case, else recursion continues
     if (leftPos >= rightPos) {
         return;
     }
 
-    //partitionTypes : FIRST_ELEMENT, MIDDLE_ELEMENT, LAST_ELEMENT, MEDIAN_ELEMENT, RANDOM_ELEMENT
-    const partitionType = MEDIAN_ELEMENT;
-
+    //partition types: FIRST_ELEMENT, MIDDLE_ELEMENT, LAST_ELEMENT, MEDIAN_ELEMENT, RANDOM_ELEMENT
     //all choices will swap with 1st element, allowing partition() to use 1st element as pivot regardless
-    choosePivot(arr.array, leftPos, rightPos, partitionType);
+    choosePivot(arr.array, leftPos, rightPos, MEDIAN_ELEMENT);
 
     //partition around chosen pivot...once properly placed, can recurse both sides
     let sortedPivotPos = partition(arr.array, leftPos, rightPos);
@@ -146,7 +139,7 @@ const quickSort = (arr, leftPos, rightPos) => {
 	//the number of comparisons is the number of spots between the boundaries
     arr.compCounter += (rightPos - leftPos);
 
-	//each call to quickSort will return full object, with both data and counter
+	//each call to quickSort will return a full object, with both data and counter
     return { 
 		"array": arr.array,
 		"compCounter": arr.compCounter
@@ -158,7 +151,7 @@ const quickSort = (arr, leftPos, rightPos) => {
 
 let result = [];
 
-parseTxtFile('./QuickSort_4.txt').then(() => {
+parseTxtFile('./QuickSort.txt').then(() => {
 
 	const arr = {
 		"array": result,
@@ -169,7 +162,7 @@ parseTxtFile('./QuickSort_4.txt').then(() => {
     let arrSorted = quickSort(arr, 0, arr.array.length - 1);
     let endTime = performance.now();
 	
-	console.log("Final compCounter: " + arrSorted.compCounter);    
+	console.log("Final compCounter : " + arrSorted.compCounter);    
 	console.log(`quickSort() took ${endTime - startTime} milliseconds`);
 	
 	//first element as pivot: 162,085 comparisons, ~9.051 milliseconds
