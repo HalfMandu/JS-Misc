@@ -12,7 +12,8 @@ const { performance } = require('perf_hooks');
 const FIRST_ELEMENT = 1;
 const MIDDLE_ELEMENT = 2;
 const LAST_ELEMENT = 3;
-const RANDOM_ELEMENT = 4;
+const MEDIAN_ELEMENT = 4;
+const RANDOM_ELEMENT = 5;
 
 //Convert txt file to array
 const parseTxtFile = async (csvFile) => {
@@ -48,6 +49,18 @@ const swap = (arr, i, j) => {
     arr[j] = temp;
 };
 
+//Identify location of which of three elements is the median (i.e., the index of the one whose value is in between the value of the other two)
+const getMedian = (arr, first, mid, last) => {
+
+	//bitwise XOR -- return element ONLY if it is greater than JUST ONE of the other two elements...
+	if ((arr[first] > arr[mid]) ^ (arr[first] > arr[last]))
+		return first;
+	if ((arr[mid] > arr[first]) ^ (arr[mid] > arr[last]))
+		return mid;
+	else
+		return last;
+}
+
 //Pivot options: 1st element, middle element, last element, or random element
 const choosePivot = (arr, left, right, pivotType) => {
 
@@ -55,14 +68,16 @@ const choosePivot = (arr, left, right, pivotType) => {
 	
     //find desired pivot point, then swap with 1st element if needed
     switch (pivotType) {
-		//by default, partition() already choosing 1st element
         case FIRST_ELEMENT:
-            return;   
+            return;
         case MIDDLE_ELEMENT:
             pivotPos = Math.floor((left + right) / 2);
             break;
 		case LAST_ELEMENT: 
 			pivotPos = right;
+			break;
+		case MEDIAN_ELEMENT: 
+			pivotPos = getMedian(arr, left, Math.floor((left + right) / 2), right);
 			break;
         case RANDOM_ELEMENT:
             pivotPos = getBoundedRandomNumber(left, right);
@@ -70,10 +85,10 @@ const choosePivot = (arr, left, right, pivotType) => {
         default:
             return;
     }
-    
+	
     //swap the chosen pivot with the left-bound, so partition() can treat it as pivot 
     swap(arr, left, pivotPos);
-
+	
     return;
 }
 
@@ -86,28 +101,27 @@ const partition = (arr, left, right) => {
 
     let i = left + 1;     //i will always start one spot ahead of leftmost boundary
     let pivotPos = left;  //pivot always chosen as 1st element in this method
-
-    //walk j from beginning to end, sending smaller values backwards as it goes
+	
+    //walk j from beginning to end, swapping smaller values backwards with i as it goes
     for (let j = left + 1; j <= right; j++) {
         if (arr[j] < arr[pivotPos]) {
             swap(arr, i, j);
             i++;
         }
     }
-	
+
     //finally, put the pivot into its rightful place: the last open spot remaining
 	//need to subtract 1, since i will finish 1 spot ahead of split
     swap(arr, pivotPos, i - 1);
-
+	
     //send back final sorted location of pivot, so quickSort knows where to cut it
     return i-1;
 }
 
-
 //main recursive call
 const quickSort = (arr, leftPos, rightPos) => {
 
-    //base cases, else recursion continues
+    //base cases, else recursion continues -- is this check necessary?
     if (arr.array.length < 2) {
         return arr;
     }
@@ -116,22 +130,23 @@ const quickSort = (arr, leftPos, rightPos) => {
         return;
     }
 
-    //partitionTypes : FIRST_ELEMENT, MIDDLE_ELEMENT, LAST_ELEMENT, RANDOM_ELEMENT
-    const partitionType = LAST_ELEMENT;
+    //partitionTypes : FIRST_ELEMENT, MIDDLE_ELEMENT, LAST_ELEMENT, MEDIAN_ELEMENT, RANDOM_ELEMENT
+    const partitionType = MEDIAN_ELEMENT;
 
     //all choices will swap with 1st element, allowing partition() to use 1st element as pivot regardless
     choosePivot(arr.array, leftPos, rightPos, partitionType);
 
     //partition around chosen pivot...once properly placed, can recurse both sides
     let sortedPivotPos = partition(arr.array, leftPos, rightPos);
-		
+	
     //recurse both sides...all elements before the pivot index go to the left, the rest to the right
     quickSort(arr, leftPos, sortedPivotPos - 1);
     quickSort(arr, sortedPivotPos + 1, rightPos);
 	
 	//the number of comparisons is the number of spots between the boundaries
     arr.compCounter += (rightPos - leftPos);
-	
+
+	//each call to quickSort will return full object, with both data and counter
     return { 
 		"array": arr.array,
 		"compCounter": arr.compCounter
@@ -141,18 +156,9 @@ const quickSort = (arr, leftPos, rightPos) => {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //Driver
 
-//let arr = [3, 4, 7, 6, 9, 16, 10, 11, 12, 2, 5, 8, 1, 13, 14, 15];
-//const arr = [3, 4, 7, 6, 9, 16, 10, 11];
-//const arr = [4, 3, 7, 6];
-//const arr = [1, 2, 3, 4];
-/* const arr = {
-	"array": [3, 4, 7, 6, 9, 16, 10, 11, 12, 2, 5, 8, 1, 13, 14, 15],
-	"compCounter": 0
-} */
-
 let result = [];
 
-parseTxtFile('./QuickSort.txt').then(() => {
+parseTxtFile('./QuickSort_4.txt').then(() => {
 
 	const arr = {
 		"array": result,
@@ -163,13 +169,13 @@ parseTxtFile('./QuickSort.txt').then(() => {
     let arrSorted = quickSort(arr, 0, arr.array.length - 1);
     let endTime = performance.now();
 	
-	console.log("final compCounter: " + arrSorted.compCounter);
-    
+	console.log("Final compCounter: " + arrSorted.compCounter);    
 	console.log(`quickSort() took ${endTime - startTime} milliseconds`);
 	
-	//first element pivot comparisons: 162,085 
-	//middle element pivot comparisons: 150,657 
-	//last element pivot comparisons: 164,123
+	//first element as pivot: 162,085 comparisons, ~9.051 milliseconds
+	//middle element as pivot: 150,657 comparisons, ~10.006 milliseconds
+	//last element as pivot: 164,123 comparisons, ~14.915 milliseconds
+	//median element as pivot: 138,382 comparisons, ~16.614 milliseconds
 	
 })
 
