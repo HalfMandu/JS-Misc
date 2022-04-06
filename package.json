@@ -2,10 +2,10 @@
   "name": "algos",
   "version": "1.0.0",
   "description": "Karatsuba integer multiplication",
-  "main": "integerMultiply.js",
+  "main": "karatsuba.js",
   "scripts": {
     "test": "jest test --watch",
-    "start": "node myBinarySearch"
+    "start": "node karatsuba"
   },
   "author": "SR",
   "license": "ISC",

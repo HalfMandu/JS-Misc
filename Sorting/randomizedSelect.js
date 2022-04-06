@@ -76,7 +76,7 @@ const choosePivot = (arr) => {
 	//choose pivot from arr uniformly at random
 	let pivot = getBoundedRandomNumber(0, arr.length-1);
 	
-	//place the (randomly) chosen pivot at the front, so partition() can chug it usually does
+	//place the (randomly) chosen pivot at the front, so partition() can chug it as it usually does
 	swap(arr, 0, pivot);
 	
 };
@@ -99,11 +99,11 @@ const RSelect = (arr, len, i) => {
 	if (j == i){
 		return arr[j-1];
 	}
-	if (j > i) {
+	else if (j > i) {
 		//recurse on the left side
 		return RSelect (arr.slice(0, j-1), j-1, i);
 	}
-	if (j < i) {
+	else {
 		//recurse on the right side...i-j since we elminated the smaller ones (j) already
 		return RSelect (arr.slice(j, arr.length), len-j, i-j);
 	}
@@ -113,7 +113,7 @@ const RSelect = (arr, len, i) => {
 //Driver
 
 //let arr = [3, 4, 7, 6, 9, 16, 10, 11, 12, 2, 5, 8, 1, 13, 14, 15]
-let orderStatistic = 456;
+let orderStatistic = 1351;
 
 console.log("RandomizedSelection()...Looking for orderStatistic: " + orderStatistic);
 
