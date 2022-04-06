@@ -11,31 +11,30 @@ const { performance } = require('perf_hooks');
 //Take input Karger txt file and output a Map, each key corrresponding to a row = [array of vertices]
 const parseKargerFile = async (kargerFile) => {
 
-    const util = require('util');
-    const fs = require('fs');
-    fs.readFileAsync = util.promisify(fs.readFile); 
+	const util = require('util');
+	const fs = require('fs');
+	fs.readFileAsync = util.promisify(fs.readFile); 
 	const data = await fs.readFileAsync(kargerFile);    
-    const lines = data.toString().split('\r\n');
-	
+	const lines = data.toString().split('\r\n');
+
 	//maps vertices (int keys) to lists of their adjacent vertices (array vals)
 	const vertMap = new Map();
 
 	//each line is a tab deliminated row of numbers (vertices)
-    lines.map(line => {
-	
-        if (!line) {
-            return null;
-        }
+	lines.map(line => {
+
+		//make sure a line exists before trying to shove it in the map
+		if (!line) { return null; }
 		
 		//es6 spread/desctructing to break apart row into key/value pairs....also removing extra commas
 		let vert, neighbors;
 		[vert, ...neighbors] = line.split('\t').toString().replace(/(^,)|(,$)/g, '').split(',');  
 		
 		//use the first number from each row as map key, and the remaining numbers on that row as value array
-        vertMap.set(Number(vert), neighbors);
-    });
+		vertMap.set(Number(vert), neighbors);
+	});
 
-    return vertMap;
+	return vertMap;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -47,21 +46,21 @@ console.log("Starting MinCut...");
 parseKargerFile('./data/kargerMinCut.txt').then((vertMap) => {
 	let startTime = performance.now();
 	countMinCuts(vertMap);
-    let endTime = performance.now();
+	let endTime = performance.now();
 	console.log(`KargerMinCut() took ${endTime - startTime} milliseconds`);  // ~300 milliseconds
 });
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Main
 
-//Method to wrap the main cutMin logic, so that we can run it many times in a row and track the results
+//Method to wrap the main cutMin logic and summarize the results
 const countMinCuts = (vertMap) => {
 	
 	//formula: n^2 * ln(n) for probability of failure < 1/n, for n total vertices
 	let trials = 10;
 	let cuts = [];
-	
-	//run minCuts repeatedly, so we can grab the min val produced
+
+	//run minCuts repeatedly, tracking each cut produced
 	for (let i=1; i<=trials; i++){
 		
 		//need to use a deep copy or else the map will interfere with previous runs
@@ -82,51 +81,66 @@ const minCut = (vertMap) => {
 	
 	//keep collapsing edges until there are only 2 vertices left
 	while (vertMap.size > 2) {
-	
-		//choose a random edge, i.e. any two connected vertices
-		let edge = pickRandomEdge(vertMap);
 		
-		//merge the two vertices
-		merge(vertMap, edge);
+		//merge two vertices of a randomly selected edge (any two connected vertices)
+		merge(vertMap, pickRandomEdge(vertMap));
 						
 	}
-	
+
 	//get the final length of the array of the first remaining key 
 	return vertMap.get(Math.min(...vertMap.keys())).length;
 	
 };
 
+//Pick a random vertice, then pick a random neighboring vertice, and return them together
+const pickRandomEdge = (vertMap) => {
+
+	//choose a random key (vertice) from Map
+	let randVert = getRandomKey([...vertMap.keys()]);		
+
+	//choose a random neighboring vertice, given the chosen vertice above
+	let neighbors = vertMap.get(randVert);
+	let randNeighbor = getBoundedRandomNumber(0, neighbors.length-2);	
+
+	//return an Object with two properties: the 2 vertice keys selected
+	let edge = {};
+	edge.vert1 = randVert;
+	edge.vert2 = Number(neighbors[randNeighbor]);
+
+	return edge;
+};
+
 //Absorb vertice v2 into vertice v1
 const merge = (vertMap, edge) => {
 
-	//temporily extract both verts so we can do our work on them
+	//temporily extract both verts to do work on them
 	let v1 = vertMap.get(edge.vert1);
 	let v2 = vertMap.get(edge.vert2);
 
 	//add all of v2's neighbors to v1's neighbors array
 	v1 = [...v1, ...v2]; 
-	
+
 	//remove v2 refs and v1 self-loops from v1 and set v1 back to main map
-	vertMap.set(edge.vert1, v1.filter((neighbor) => { 
-		return (neighbor != edge.vert2) && (neighbor != edge.vert1);
-	}));
-	
-	//change stale refs from v2 to v1 for v2's neighbors
+	vertMap.set(edge.vert1, v1.filter((neighbor) => 
+		(neighbor != edge.vert2) && (neighbor != edge.vert1)
+	));
+
+	//for v2's neighbors, change stale v2 refs to v1
 	updateVertReferences(vertMap, edge);
-	
-	//remove v2
+
+	//finally, remove the now-defunct v2
 	vertMap.delete(edge.vert2); 
-	
+
 };
 
-//Change any mentions of v2 to v1 throughout the map/graph 
+//Change any remaining mentions of v2 to v1 throughout the map/graph 
 const updateVertReferences = (vertMap, edge) => {
 	
 	//for all neighbors of v2 (except v1), update their v2 refs
 	for (neighbor of vertMap.get(edge.vert2)) {
 		if (neighbor != edge.vert1){
 			
-			//retrive this neighbor's adajency list, since it must mention v2
+			//retrieve this neighbor's neighbor list, since it must mention v2
 			let currNeighbors = vertMap.get(Number(neighbor));
 			
 			//move through this neighbor's array, until ALL mentions of v2 have been changed to v1
@@ -139,24 +153,6 @@ const updateVertReferences = (vertMap, edge) => {
 	}
 };
 
-//Pick a random vertice, then pick a random neighboring vertice, and return them together
-const pickRandomEdge = (vertMap) => {
-	
-	//choose a random key (vertice) from Map
-	let randVert = getRandomArrayKey([...vertMap.keys()]);		
-	
-	//choose a random neighboring vertice, given the chosen vertice above
-	let neighbors = vertMap.get(randVert);
-	let randNeighbor = getBoundedRandomNumber(0, neighbors.length-2);	
-	
-	//return object will be a 2 element array populated from random vert selections
-	let edge = {};
-	edge.vert1 = randVert;
-	edge.vert2 = Number(neighbors[randNeighbor]);
-	
-	return edge;
-};
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Helpers
 
@@ -166,8 +162,8 @@ const getBoundedRandomNumber = (min, max) => {
 };
 
 //takes in list of keys and returns a random one
-const getRandomArrayKey = (keys) => {
-    let rand = Math.floor(Math.random() * (keys.length));
+const getRandomKey = (keys) => {
+	let rand = Math.floor(Math.random() * (keys.length));
 	return keys[rand];
 };
 
