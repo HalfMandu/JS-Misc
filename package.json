@@ -5,7 +5,7 @@
   "main": "karatsuba.js",
   "scripts": {
     "test": "jest test --watch",
-    "start": "node karatsuba"
+    "start": "node DataStructures/Stack"
   },
   "author": "SR",
   "license": "ISC",
