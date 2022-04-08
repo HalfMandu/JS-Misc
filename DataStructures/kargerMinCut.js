@@ -172,25 +172,3 @@ const printGraph = (vertMap) => {
 	console.log("CURRENT GRAPH MAP: ");	
 	console.log(vertMap.entries());	
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
