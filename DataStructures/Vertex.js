@@ -8,16 +8,15 @@ class Vertex {
 		this.neighbors = []; // adjacency list
 	}
 	
-	//append a node to end of adjacency list
+	//append a vertex/node to end of adjacency list
 	addNeighbor(vertex) {
 		this.neighbors.push(vertex);  //push() natively returns the new length of array
 	}
 	
 	//if it exists, delete it and return deleted node
 	removeNeighbor(vertex) {
-		const index = this.neighbors.indexOf(vertex);
-		if (index > -1) {
-			this.neighbors.splice(index, 1);  //remove it from the list
+		if (this.neighbors.has(vertex)) {
+			this.neighbors.splice(this.neighbors.indexOf(vertex), 1);  //remove it from the list
 			return vertex;
 		}
 	}
@@ -27,9 +26,9 @@ class Vertex {
 		return this.neighbors;
 	}
 
-	//boolean
-	isAdjacent(vertex) {
-		return this.neighbors.indexOf(vertex) > -1;
+	//boolean check if a vertex is in the neighbors list
+	isNeighbor(vertex) {
+		return this.neighbors.has(vertex);
 	}
 
 }

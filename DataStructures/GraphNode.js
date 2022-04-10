@@ -2,7 +2,7 @@
 *	Graph
 *   Stephen Rinkus 
 *
-*	A Graph implementation which uses Node objects to represent vertices.
+*	A Graph implementation which uses Vertex objects to represent nodes in the graph.
 *	Queue and Stack are used for BFS/DFS.
 *  	
 */
@@ -10,6 +10,9 @@
 import { Vertex } from "./Vertex.js";
 import { Queue } from "./Queue.js";
 import { Stack } from "./Stack.js";
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Main
 
 class Graph {
 	
@@ -22,14 +25,15 @@ class Graph {
 	//add to map edge: (vert1 -> vert2)
 	addEdge(vert1, vert2) {
 	
-		const v1 = this.addVertex(vert1);   //add vert1 to map
-		const v2 = this.addVertex(vert2);   //add vert2 to map
+		//add vert1 and vert2 keys to the map
+		const v1 = this.addVertex(vert1);   
+		const v2 = this.addVertex(vert2);  
 
-		v1.addNeighbor(v2);   //add a ref of v2 to v1
+		//add a ref of v2 to v1
+		v1.addNeighbor(v2);
 
-		if (this.edgeDir === Graph.UNDIRECTED) {
-			v2.addNeighbor(v1);  //only a ref of v1 to v2 if graph is undirected
-		}
+		//only add a ref of v1 to v2 if graph is undirected
+		this.edgeDir === Graph.UNDIRECTED ? v2.addNeighbor(v1) : null;
 
 		return [v1, v2];
 	}
@@ -67,22 +71,18 @@ class Graph {
 
 		//if they exist, remove their refs to each other
 		if (v1 && v2) {
-		
 			v1.removeNeighbor(v2);  //remove one neighbor (v2) from v1's list
-
-			if (this.edgeDir === Graph.UNDIRECTED) {
-				v2.removeNeighbor(v1);
-			}
+			this.edgeDir === Graph.UNDIRECTED ? v2.removeNeighbor(v1) : null;
 		}
 
 		return [v1, v2];
 	}
 	
-	//JavaScript generators, iterating one val at a time...good for large graphs 
+	//js generator, iterating one val at a time, good for large graphs 
 	*bfs(first) {
 	
 		const explored = new Map();     //keeps track of which vertices have been visited
-		const toExplore = new Queue();  //governs order of exploration for the remaining vertices
+		const toExplore = new Queue();  //governs (FIFO) order of exploration for the remaining vertices
 
 		toExplore.enqueue(first);       //begin the search with the root element of the graph
 		
@@ -98,11 +98,11 @@ class Graph {
 		}
 	}
 	
-	//depth first 
+	//depth first search, simlar to bfs except using Stack to explore
 	*dfs(first) {
 	
-		const explored = new Map();
-		const toExplore = new Stack();
+		const explored = new Map();	   //keeps track of which vertices have been visited
+		const toExplore = new Stack(); //governs (LIFO) order of exploration for the remaining vertices
 
 		toExplore.push(first);
 
@@ -118,13 +118,13 @@ class Graph {
 		
 }
 
-Graph.UNDIRECTED = Symbol('directed graph'); // two-ways edges
-Graph.DIRECTED = Symbol('undirected graph'); // one-way edges
+Graph.UNDIRECTED = Symbol('directed graph');  // two-way edges
+Graph.DIRECTED = Symbol('undirected graph');  // one-way edges
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Driver
 
 const graph = new Graph(Graph.UNDIRECTED);
-
 
 const [bfsFirst] = graph.addEdge(1, 2);
 graph.addEdge(1, 3);
