@@ -16,13 +16,13 @@ import { Stack } from "./Stack.js";
 
 class Graph {
 	
-	//default to undirected graph
+	//a Graph instance keeps track of its vertices and direction type (defaults to undirected)
 	constructor(edgeDir = Graph.UNDIRECTED) {
-		this.vertices = new Map();
-		this.edgeDir = edgeDir;
+		this.vertices = new Map();  //keys are the unique graph vertices...mapped to their neighbor lists
+		this.edgeDir = edgeDir;     //DIRECTED, UNDIRECTED
 	}  
 	
-	//add to map edge: (vert1 -> vert2)
+	//add to map new edge: (vert1 -> vert2) and return it
 	addEdge(vert1, vert2) {
 	
 		//add vert1 and vert2 keys to the map
@@ -34,13 +34,15 @@ class Graph {
 
 		//only add a ref of v1 to v2 if graph is undirected
 		this.edgeDir === Graph.UNDIRECTED ? v2.addNeighbor(v1) : null;
-
+		
+		//return the freshly added edge
 		return [v1, v2];
 	}
 	
-	//add a vertex node to the map and return it
+	//add a vertex node to the graph and return it
 	addVertex(vertexKey) {
-		//if it already exists, just return its value
+	
+		//if it already exists, just return its value, otherwise create a new node and set it
 		if (this.vertices.has(vertexKey)) {
 			return this.vertices.get(vertexKey);
 		} else {
@@ -50,26 +52,28 @@ class Graph {
 		}
 	}
 	
-	//delete a vertex from the map
-	//this method could be improved to just look in the affected keys, instead of all...
+	//delete a vertex from the map and return deleted vertex
 	removeVertex(vertexKey) {
-		const vertex = this.vertices.get(vertexKey);
-		if (vertex) {
-			//look in all nodes' values for the vertex and remove it if found...
-			for (const neighbor of this.vertices.values()) {
+	
+		if (this.vertices.has(vertexKey)) {
+		
+			//only remove neighbor if they are neighbors to begin with
+			for (let neighbor of this.vertices.get(vertexKey)) {
 				neighbor.removeNeighbor(vertex);
 			}
 		}
+		
+		//finally, delete now-defunct vertex key from the map
 		return this.vertices.delete(vertexKey);
 	}
 	
-	//delete edge (vert1, vert2)
+	//delete edge (vert1, vert2), and return deleted edge
 	removeEdge(vert1, vert2) {
 	
 		const v1 = this.vertices.get(vert1);
 		const v2 = this.vertices.get(vert2);
 
-		//if they exist, remove their refs to each other
+		//if they exist, remove their mutual refs
 		if (v1 && v2) {
 			v1.removeNeighbor(v2);  //remove one neighbor (v2) from v1's list
 			this.edgeDir === Graph.UNDIRECTED ? v2.removeNeighbor(v1) : null;
@@ -98,7 +102,7 @@ class Graph {
 		}
 	}
 	
-	//depth first search, simlar to bfs except using Stack to explore
+	//depth first search, similar to bfs except using Stack to explore
 	*dfs(first) {
 	
 		const explored = new Map();	   //keeps track of which vertices have been visited

@@ -6,8 +6,8 @@ class Stack {
 	}
 
 	//push to end of list, already avaiable from Array.prototype  
-	push = (element) => {
-		this.items.push(element);
+	push = (item) => {
+		this.items.push(item);
 	}
 
 	//pop from end of list (and return item), already avaiable from Array.prototype
