@@ -5,7 +5,7 @@ class Vertex {
 	//each Node holds that vertex’s value and a list of its adjacent vertices
 	constructor(value) {
 		this.value = value;
-		this.neighbors = []; // adjacency list
+		this.neighbors = [];   // adjacency list
 	}
 	
 	//append a vertex/node to end of adjacency list

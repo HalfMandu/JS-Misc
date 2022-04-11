@@ -28,7 +28,7 @@ class Graph {
 		//add vert1 and vert2 keys to the map
 		const v1 = this.addVertex(vert1);   
 		const v2 = this.addVertex(vert2);  
-
+		
 		//add a ref of v2 to v1
 		v1.addNeighbor(v2);
 
@@ -55,12 +55,16 @@ class Graph {
 	//delete a vertex from the map and return deleted vertex
 	removeVertex(vertexKey) {
 	
+		//console.log([...this.vertices.values()]);
+	
 		if (this.vertices.has(vertexKey)) {
 		
+			console.log("removing: " + vertexKey);
+		
 			//only remove neighbor if they are neighbors to begin with
-			for (let neighbor of this.vertices.get(vertexKey)) {
-				neighbor.removeNeighbor(vertex);
-			}
+			/* for (let neighbor of this.vertices.get(vertexKey)) {
+				neighbor.removeNeighbor(vertexKey);
+			} */
 		}
 		
 		//finally, delete now-defunct vertex key from the map
@@ -82,8 +86,46 @@ class Graph {
 		return [v1, v2];
 	}
 	
+	//breadth first search
+	bfs(first) {
+	
+		const explored = new Map();     //keeps track of which vertices have been visited
+		const toExplore = new Queue();  //governs (FIFO) order of exploration for the remaining vertices
+
+		toExplore.enqueue(first);       //begin the search with the root element of the graph
+		
+		//while there are still vertices to explore, keep recursing
+		while (!toExplore.isEmpty()) {
+			const nextVertex = toExplore.dequeue();
+			//if the vertex exists and the map hasn't seen it yet, explore it and recurse its neighbors
+			if (nextVertex && !explored.has(nextVertex)) {
+				explored.set(nextVertex);    //mark as visited
+				nextVertex.getNeighbors().forEach(neighbor => toExplore.enqueue(neighbor));
+				console.log(nextVertex);
+			}
+		}
+	}
+	
+	//depth first search, similar to bfs except using Stack to explore
+	dfs(first) {
+	
+		const explored = new Map();	   //keeps track of which vertices have been visited
+		const toExplore = new Stack(); //governs (LIFO) order of exploration for the remaining vertices
+
+		toExplore.push(first);
+
+		while (!toExplore.isEmpty()) {
+			const nextVertex = toExplore.pop();
+			if (nextVertex && !explored.has(nextVertex)) {
+				explored.set(nextVertex);
+				nextVertex.getNeighbors().forEach(neighbor => toExplore.push(neighbor));
+				console.log(nextVertex);
+			}
+		}
+	}
+	
 	//js generator, iterating one val at a time, good for large graphs 
-	*bfs(first) {
+	*bfsGen(first) {
 	
 		const explored = new Map();     //keeps track of which vertices have been visited
 		const toExplore = new Queue();  //governs (FIFO) order of exploration for the remaining vertices
@@ -96,14 +138,14 @@ class Graph {
 			//if the vertex exists and the map hasn't seen it yet, explore it and recurse its neighbors
 			if (nextVertex && !explored.has(nextVertex)) {
 				yield nextVertex;
-				explored.set(nextVertex);  //mark as visited
+				explored.set(nextVertex);    //mark as visited
 				nextVertex.getNeighbors().forEach(neighbor => toExplore.enqueue(neighbor));
 			}
 		}
 	}
 	
 	//depth first search, similar to bfs except using Stack to explore
-	*dfs(first) {
+	*dfsGen(first) {
 	
 		const explored = new Map();	   //keeps track of which vertices have been visited
 		const toExplore = new Stack(); //governs (LIFO) order of exploration for the remaining vertices
@@ -119,6 +161,18 @@ class Graph {
 			}
 		}
 	}
+	
+	//display the current state of Graph
+	printGraph(){
+	
+		console.log("GRAPH: ");
+		console.log(this.vertices.entries());
+		
+		/* for (vert of this.vertices){
+			
+		} */
+		
+	}
 		
 }
 
@@ -130,7 +184,7 @@ Graph.DIRECTED = Symbol('undirected graph');  // one-way edges
 
 const graph = new Graph(Graph.UNDIRECTED);
 
-const [bfsFirst] = graph.addEdge(1, 2);
+const [firstElement] = graph.addEdge(1, 2);
 graph.addEdge(1, 3);
 graph.addEdge(1, 4);
 graph.addEdge(5, 2);
@@ -142,11 +196,31 @@ graph.addEdge(10, 6);
 
 console.log("Running BFS...");
 
-let bfsFromFirst = graph.bfs(bfsFirst);
+let bfsFirstElement = graph.bfs(firstElement);
 
-console.log("bfsFromFirst: ");
+console.log("bfs from first element: " + bfsFirstElement); 
 
-console.log(bfsFromFirst.next().value.value); // 1
+graph.printGraph();
+
+/////////////////////////////////////////////
+
+/* const [bfsFirst] = graph.addEdge(1, 2);
+graph.addEdge(1, 3);
+graph.addEdge(1, 4);
+graph.addEdge(5, 2);
+graph.addEdge(6, 3);
+graph.addEdge(7, 3);
+graph.addEdge(8, 4);
+graph.addEdge(9, 5);
+graph.addEdge(10, 6);
+
+console.log("Running BFS...");
+
+let bfsFromFirst = graph.bfsGen(bfsFirst);
+
+console.log("bfsFromFirst: "); */
+
+/* console.log(bfsFromFirst.next().value.value); // 1
 console.log(bfsFromFirst.next().value.value); // 2
 console.log(bfsFromFirst.next().value.value); // 3
 console.log(bfsFromFirst.next().value.value); // 4
@@ -155,12 +229,12 @@ console.log(bfsFromFirst.next().value.value); // 6
 console.log(bfsFromFirst.next().value.value); // 7
 console.log(bfsFromFirst.next().value.value); // 8
 console.log(bfsFromFirst.next().value.value); // 9
-console.log(bfsFromFirst.next().value.value); // 10
+console.log(bfsFromFirst.next().value.value); // 10 */
 //console.log(bfsFromFirst.next().value.value); // error
 
 /////////////////////////////////////////////
 
-const graph2 = new Graph(Graph.UNDIRECTED);
+/* const graph2 = new Graph(Graph.UNDIRECTED);
 
 console.log("Running DFS...");
 
@@ -174,14 +248,20 @@ graph2.addEdge(8, 4);
 graph2.addEdge(9, 5);
 graph2.addEdge(10, 6);
 
-let dfsFromFirst = graph2.dfs(dfsFirst);
+console.log([...graph2.vertices]);
+
+let dfsFromFirst = graph2.dfsGen(dfsFirst);
 let exploredOrder = Array.from(dfsFromFirst);
 const values = exploredOrder.map(vertex => vertex.value);
 console.log(values);	// [1, 4, 8, 3, 7, 6, 10, 2, 5, 9]
 
+//test remove 
+graph2.removeVertex(10);
 
-
-
+let dfsFromFirst2 = graph2.dfs(dfsFirst);
+let exploredOrder2 = Array.from(dfsFromFirst);
+const values2 = exploredOrder.map(vertex => vertex.value);
+console.log(values2);	// [1, 4, 8, 3, 7, 6, 10, 2, 5, 9] */
 
 
 
