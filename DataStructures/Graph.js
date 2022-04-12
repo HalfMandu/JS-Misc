@@ -6,67 +6,79 @@
 */
 
 import { Queue } from "./Queue.js";
+import { Stack } from "./Stack.js";
 
 class Graph {
 	
-	//each graph instance has a mapping of vertices to their adjacents...(int key, [] neighbors)
+	//Each graph instance has a mapping of vertices to their adjacents...(int key, [] neighbors)
 	constructor(numVerts) {
 		this.numVerts = numVerts;
 		this.vertices = new Map();
-	}
+	};
 
-	//add a vertex to the graph
+	//Add a vertex to the graph...
 	addVertex(v) {
-	
-		//a brand new vertex doesn't yet have neighors...initialize the adjacent list with an empty array
-		this.vertices.set(v, []);
-	}
+		
+		//no need to add if it already exists
+		if (!this.vertices.has(v)){
+			//a brand new vertex doesn't yet have neighors...initialize the adjacent list with an empty array
+			this.vertices.set(v, []);		
+		}
+		
+	};
 
-	//add a new edge to the graph
+	//Add a new edge to the graph
 	addEdge(v, w) {
 		
-		//get the nieghbors list for vertex v and add the vertex w (edge between v and w)
-		this.vertices.get(v).push(w);
-
-		//undirected graph means also need to add an edge from w to v 
-		this.vertices.get(w).push(v);
-	}
-	
-	//delete a vertex from the graph
-	removeVertex(v) {
-	
+		//adds vertices if they don't exist
+		this.addVertex(v);
+		this.addVertex(w);
+		
+		//don't add if already exists...and if they don't already reference eachother, make them
+		if (!(this.vertices.get(v)).includes(w)){
+			this.vertices.get(v).push(w);
+			this.vertices.get(w).push(v);
+		}
+		
 	};
 	
+	//Delete a vertex from the graph
+	removeVertex(v) {
+		
+		//only delete if it exists
+		if (this.vertices.has(v)){
+			
+			//go through each of its neighbors' lists and remove their ref to it
+			for (let neighbor of this.vertices.get(v)){
+				this.vertices.get(neighbor).splice(this.vertices.get(neighbor).indexOf(v), 1); 
+			}
+			
+			//finally, delete obsolete v
+			this.vertices.delete(v);
+		}
+	};
 	
-	//delete an edge from the graph
+	//Delete an edge from the graph
 	removeEdge(v, w) {
-	
+		
+		//remove v and w's refs to each other
+		if (this.vertices.has(v)){
+			
+		}
+		
 	};
 	
 	//Prints all vertices and their adjacency lists
 	printGraph() {
-	
-		//get all the vertices
-		const keys = this.vertices.keys();
-
-		//iterate over the vertices
-		for (let vert of keys)	{
 		
-			//get the corresponding adjacency list for the vertex
-			let neighbors = this.vertices.get(vert);
-			let out = [];
-
-			//iterate over the adjacency list and add to output string array
-			for (let neighbor of neighbors){
-				out = [...out, neighbor];
-			}
-			
-			//print the vertex and its adjacency list
-			console.log(vert + " : " + [...out]);
+		//extract key/vals and display them
+		for (let [vertex, neighbors] of this.vertices){
+			console.log(vertex, neighbors);
 		}
-	}
+	
+	};
 		
-	//breadth first search
+	//Breadth first search - queue
 	bfs(start) {
 
 		//track visibility boolean for each vertex
@@ -87,16 +99,49 @@ class Graph {
 				if (!explored[neighbor]){
 					explored[neighbor] = true;
 					exploreQueue.enqueue(neighbor);
-					console.log(neighbor);  //found a new vertex
+					console.log(neighbor); 
 				}
 			}
 		}		
 	};
 	
-	//similar to bfs but using a Stack
-	dfs(start) { 
+	//Depth first search - recursive
+	dfs(start, explored) {
+		
+		explored[start] = true;
+		console.log(start);
+		
+		for (let neighbor of this.vertices.get(start)){
+			if (!explored[neighbor]){
+				explored[neighbor] = true;
+				this.dfs(neighbor, explored);
+			}
+		}		
+	};
 	
-	}
+	//Depth first search - stack
+	dfsStack(start) { 
+		
+		const explored = {};
+		const exploreStack = new Stack();
+		exploreStack.push(start);
+		
+		while (!exploreStack.isEmpty()) {
+			
+			let nextVert = exploreStack.pop();
+			
+			if (!explored[nextVert]){
+				
+				explored[nextVert] = true;
+				console.log(nextVert);
+				
+				for (let neighbor of this.vertices.get(nextVert)){
+					exploreStack.push(neighbor);
+				}
+				
+			}
+		}
+	};
 
 }
 
@@ -107,23 +152,33 @@ const graph = new Graph();
 const vertices = [ 'A', 'B', 'C', 'D', 'E', 'F' ];
 //const vertices = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J' ];
 
-//adding vertices
-vertices.forEach(vert => graph.addVertex(vert));
-
-//adding edges
+//initialize graph by adding edges
 graph.addEdge('A', 'B');
 graph.addEdge('A', 'D');
 graph.addEdge('A', 'E');
 graph.addEdge('B', 'C');
 graph.addEdge('D', 'E');
 graph.addEdge('E', 'F');
-graph.addEdge('E', 'C');
+//graph.addEdge('E', 'C');
 graph.addEdge('C', 'F');
+graph.addEdge('F', 'G');
+graph.addEdge('G', 'H');
+graph.addEdge('Y', 'Z');  //m and p are seperated, unreachable...
 
 graph.printGraph();
 
-console.log("Starting BFS...");
+//console.log("Removing vertex...");
+//graph.removeVertex('F');
+//graph.printGraph();
+
+console.log("BFS...");
 graph.bfs('A');
+
+console.log("DFS...");
+graph.dfs('A', {});
+
+console.log("DFS Stack...");
+graph.dfsStack('A');
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -3,6 +3,7 @@
 *   Stephen Rinkus 
 *
 *	A Graph implementation which uses Vertex objects to represent nodes in the graph.
+*	This implementation handles directed and undirected graphs.
 *	Queue and Stack are used for BFS/DFS.
 *  	
 */
