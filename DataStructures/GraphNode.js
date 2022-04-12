@@ -128,18 +128,16 @@ class Graph {
 	//js generator, iterating one val at a time, good for large graphs 
 	*bfsGen(first) {
 	
-		const explored = new Map();     //keeps track of which vertices have been visited
-		const toExplore = new Queue();  //governs (FIFO) order of exploration for the remaining vertices
+		const explored = new Map();    
+		const toExplore = new Queue();  
 
-		toExplore.enqueue(first);       //begin the search with the root element of the graph
+		toExplore.enqueue(first);       
 		
-		//while there are still vertices to explore, keep recursing
 		while (!toExplore.isEmpty()) {
 			const nextVertex = toExplore.dequeue();
-			//if the vertex exists and the map hasn't seen it yet, explore it and recurse its neighbors
 			if (nextVertex && !explored.has(nextVertex)) {
 				yield nextVertex;
-				explored.set(nextVertex);    //mark as visited
+				explored.set(nextVertex);   
 				nextVertex.getNeighbors().forEach(neighbor => toExplore.enqueue(neighbor));
 			}
 		}
@@ -148,8 +146,8 @@ class Graph {
 	//depth first search, similar to bfs except using Stack to explore
 	*dfsGen(first) {
 	
-		const explored = new Map();	   //keeps track of which vertices have been visited
-		const toExplore = new Stack(); //governs (LIFO) order of exploration for the remaining vertices
+		const explored = new Map();	   
+		const toExplore = new Stack(); 
 
 		toExplore.push(first);
 
@@ -168,10 +166,6 @@ class Graph {
 	
 		console.log("GRAPH: ");
 		console.log(this.vertices.entries());
-		
-		/* for (vert of this.vertices){
-			
-		} */
 		
 	}
 		

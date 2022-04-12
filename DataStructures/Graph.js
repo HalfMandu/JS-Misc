@@ -19,25 +19,25 @@ class Graph {
 	//Add a vertex to the graph...
 	addVertex(v) {
 		
-		//no need to add if it already exists
+		//only if it doesn't already exist
 		if (!this.vertices.has(v)){
-			//a brand new vertex doesn't yet have neighors...initialize the adjacent list with an empty array
+			//a new vertex doesn't have neighors yet...initialize the adjacent list with an empty array
 			this.vertices.set(v, []);		
 		}
 		
 	};
 
-	//Add a new edge to the graph
-	addEdge(v, w) {
+	//Add a new edge to the graph...allowing addition new vertices
+	addEdge(v1, v2) {
 		
 		//adds vertices if they don't exist
-		this.addVertex(v);
-		this.addVertex(w);
+		this.addVertex(v1);
+		this.addVertex(v2);
 		
-		//don't add if already exists...and if they don't already reference eachother, make them
-		if (!(this.vertices.get(v)).includes(w)){
-			this.vertices.get(v).push(w);
-			this.vertices.get(w).push(v);
+		//if they don't already reference eachother, make them
+		if (!(this.vertices.get(v1)).includes(v2)){
+			this.vertices.get(v1).push(v2);
+			this.vertices.get(v2).push(v1);
 		}
 		
 	};
@@ -45,7 +45,7 @@ class Graph {
 	//Delete a vertex from the graph
 	removeVertex(v) {
 		
-		//only delete if it exists
+		//only delete it if it exists
 		if (this.vertices.has(v)){
 			
 			//go through each of its neighbors' lists and remove their ref to it
@@ -59,11 +59,12 @@ class Graph {
 	};
 	
 	//Delete an edge from the graph
-	removeEdge(v, w) {
+	removeEdge(v1, v2) {
 		
-		//remove v and w's refs to each other
-		if (this.vertices.has(v)){
-			
+		//remove v1 and v2's refs to each other (if they both exist and are neighbors)
+		if (this.vertices.has(v1) && this.vertices.has(v2) && this.vertices.get(v1).includes(v2)){
+			this.vertices.get(v1).splice(this.vertices.get(v1).indexOf(v2), 1); 
+			this.vertices.get(v2).splice(this.vertices.get(v2).indexOf(v1), 1); 
 		}
 		
 	};
@@ -108,6 +109,7 @@ class Graph {
 	//Depth first search - recursive
 	dfs(start, explored) {
 		
+		//explored begins as empty {}
 		explored[start] = true;
 		console.log(start);
 		
@@ -150,7 +152,6 @@ class Graph {
 
 const graph = new Graph();
 const vertices = [ 'A', 'B', 'C', 'D', 'E', 'F' ];
-//const vertices = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J' ];
 
 //initialize graph by adding edges
 graph.addEdge('A', 'B');
@@ -159,17 +160,12 @@ graph.addEdge('A', 'E');
 graph.addEdge('B', 'C');
 graph.addEdge('D', 'E');
 graph.addEdge('E', 'F');
-//graph.addEdge('E', 'C');
 graph.addEdge('C', 'F');
 graph.addEdge('F', 'G');
 graph.addEdge('G', 'H');
-graph.addEdge('Y', 'Z');  //m and p are seperated, unreachable...
+graph.addEdge('Y', 'Z');  //these verts are seperated from the rest, unreachable...
 
 graph.printGraph();
-
-//console.log("Removing vertex...");
-//graph.removeVertex('F');
-//graph.printGraph();
 
 console.log("BFS...");
 graph.bfs('A');
@@ -179,6 +175,14 @@ graph.dfs('A', {});
 
 console.log("DFS Stack...");
 graph.dfsStack('A');
+
+console.log("Removing vertex...");
+graph.removeVertex('F');
+graph.printGraph();
+
+console.log("Removing edge...");
+graph.removeEdge('B', 'C');
+graph.printGraph();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
