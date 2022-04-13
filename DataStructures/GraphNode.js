@@ -78,8 +78,8 @@ class Graph {
 		const v1 = this.vertices.get(vert1);
 		const v2 = this.vertices.get(vert2);
 
-		//if they exist, remove their mutual refs
-		if (v1 && v2) {
+		//if they exist and are adjacent, remove their mutual refs
+		if (v1 && v2 && this.isNeighbor(v2)) {
 			v1.removeNeighbor(v2);  //remove one neighbor (v2) from v1's list
 			this.edgeDir === Graph.UNDIRECTED ? v2.removeNeighbor(v1) : null;
 		}
@@ -89,7 +89,7 @@ class Graph {
 	
 	//breadth first search
 	bfs(first) {
-	
+		
 		const explored = new Map();     //keeps track of which vertices have been visited
 		const toExplore = new Queue();  //governs (FIFO) order of exploration for the remaining vertices
 
@@ -102,7 +102,7 @@ class Graph {
 			if (nextVertex && !explored.has(nextVertex)) {
 				explored.set(nextVertex);    //mark as visited
 				nextVertex.getNeighbors().forEach(neighbor => toExplore.enqueue(neighbor));
-				console.log(nextVertex);
+				console.log(nextVertex.value);
 			}
 		}
 	}
@@ -120,10 +120,25 @@ class Graph {
 			if (nextVertex && !explored.has(nextVertex)) {
 				explored.set(nextVertex);
 				nextVertex.getNeighbors().forEach(neighbor => toExplore.push(neighbor));
-				console.log(nextVertex);
+				console.log(nextVertex.value);
 			}
 		}
 	}
+	
+	//depth first search - recursive implementation
+	dfsRecursive(start, explored) {
+		
+		//explored begins as empty {}
+		explored[start.value] = true;
+		console.log(start.value);
+		
+		for (let neighbor of this.vertices.get(start.value).getNeighbors()){
+			if (!explored[neighbor.value]){
+				explored[neighbor.value] = true;
+				this.dfsRecursive(neighbor, explored);
+			}
+		}		
+	};
 	
 	//js generator, iterating one val at a time, good for large graphs 
 	*bfsGen(first) {
@@ -179,7 +194,7 @@ Graph.DIRECTED = Symbol('undirected graph');  // one-way edges
 
 const graph = new Graph(Graph.UNDIRECTED);
 
-const [firstElement] = graph.addEdge(1, 2);
+const [firstEdge] = graph.addEdge(1, 2);
 graph.addEdge(1, 3);
 graph.addEdge(1, 4);
 graph.addEdge(5, 2);
@@ -191,72 +206,51 @@ graph.addEdge(10, 6);
 
 console.log("Running BFS...");
 
-let bfsFirstElement = graph.bfs(firstElement);
-
-console.log("bfs from first element: " + bfsFirstElement); 
-
-graph.printGraph();
+graph.bfs(firstEdge);
 
 /////////////////////////////////////////////
 
-/* const [bfsFirst] = graph.addEdge(1, 2);
-graph.addEdge(1, 3);
-graph.addEdge(1, 4);
-graph.addEdge(5, 2);
-graph.addEdge(6, 3);
-graph.addEdge(7, 3);
-graph.addEdge(8, 4);
-graph.addEdge(9, 5);
-graph.addEdge(10, 6);
+console.log("Running BFS gen...");
 
-console.log("Running BFS...");
+let bsf2 = graph.bfsGen(firstEdge);
 
-let bfsFromFirst = graph.bfsGen(bfsFirst);
-
-console.log("bfsFromFirst: "); */
-
-/* console.log(bfsFromFirst.next().value.value); // 1
-console.log(bfsFromFirst.next().value.value); // 2
-console.log(bfsFromFirst.next().value.value); // 3
-console.log(bfsFromFirst.next().value.value); // 4
-console.log(bfsFromFirst.next().value.value); // 5
-console.log(bfsFromFirst.next().value.value); // 6
-console.log(bfsFromFirst.next().value.value); // 7
-console.log(bfsFromFirst.next().value.value); // 8
-console.log(bfsFromFirst.next().value.value); // 9
-console.log(bfsFromFirst.next().value.value); // 10 */
-//console.log(bfsFromFirst.next().value.value); // error
+console.log(bsf2.next().value.value); // 1
+console.log(bsf2.next().value.value); // 2
+console.log(bsf2.next().value.value); // 3
+console.log(bsf2.next().value.value); // 4
+console.log(bsf2.next().value.value); // 5
+console.log(bsf2.next().value.value); // 6
+console.log(bsf2.next().value.value); // 7
+console.log(bsf2.next().value.value); // 8
+console.log(bsf2.next().value.value); // 9
+console.log(bsf2.next().value.value); // 10 
+//console.log(bsf2.next().value.value); // error
 
 /////////////////////////////////////////////
-
-/* const graph2 = new Graph(Graph.UNDIRECTED);
 
 console.log("Running DFS...");
 
-const [dfsFirst] = graph2.addEdge(1, 2);
-graph2.addEdge(1, 3);
-graph2.addEdge(1, 4);
-graph2.addEdge(5, 2);
-graph2.addEdge(6, 3);
-graph2.addEdge(7, 3);
-graph2.addEdge(8, 4);
-graph2.addEdge(9, 5);
-graph2.addEdge(10, 6);
-
-console.log([...graph2.vertices]);
-
-let dfsFromFirst = graph2.dfsGen(dfsFirst);
+/* let dfsFromFirst = graph.dfsGen(firstEdge);
 let exploredOrder = Array.from(dfsFromFirst);
 const values = exploredOrder.map(vertex => vertex.value);
-console.log(values);	// [1, 4, 8, 3, 7, 6, 10, 2, 5, 9]
+console.log(values);	// [1, 4, 8, 3, 7, 6, 10, 2, 5, 9] 
 
-//test remove 
-graph2.removeVertex(10);
-
-let dfsFromFirst2 = graph2.dfs(dfsFirst);
 let exploredOrder2 = Array.from(dfsFromFirst);
 const values2 = exploredOrder.map(vertex => vertex.value);
-console.log(values2);	// [1, 4, 8, 3, 7, 6, 10, 2, 5, 9] */
+console.log(values2);	// [1, 4, 8, 3, 7, 6, 10, 2, 5, 9] 
+*/
+
+console.log("DFS stack: ");
+graph.dfs(firstEdge);
+
+console.log("DFS recursive: ");
+graph.dfsRecursive(firstEdge, {});
+
+/////////////////////////////////////////////
+
+//test remove 
+//graph.removeVertex(10);
+
 
 
 

@@ -2,7 +2,7 @@
 //Vertex = Node in the Graph
 class Vertex {
 	
-	//each Node holds that vertex’s value and a list of its adjacent vertices
+	//each vertex holds that vertex’s value along with a list of it's adjacent vertices
 	constructor(value) {
 		this.value = value;
 		this.neighbors = [];   // adjacency list
@@ -13,7 +13,7 @@ class Vertex {
 		this.neighbors.push(vertex);  //push() natively returns the new length of array
 	}
 	
-	//if it exists, delete it and return deleted node
+	//if it exists, delete it and return deleted vertex
 	removeNeighbor(vertex) {
 		if (this.neighbors.has(vertex)) {
 			this.neighbors.splice(this.neighbors.indexOf(vertex), 1);  //remove it from the list
@@ -21,7 +21,7 @@ class Vertex {
 		}
 	}
 	
-	//return the adjacency list
+	//return a list of all vertices that share and edge with this vertex
 	getNeighbors() {
 		return this.neighbors;
 	}

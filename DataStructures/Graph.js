@@ -68,16 +68,6 @@ class Graph {
 		}
 		
 	};
-	
-	//Prints all vertices and their adjacency lists
-	printGraph() {
-		
-		//extract key/vals and display them
-		for (let [vertex, neighbors] of this.vertices){
-			console.log(vertex, neighbors);
-		}
-	
-	};
 		
 	//Breadth first search - queue
 	bfs(start) {
@@ -129,22 +119,24 @@ class Graph {
 		exploreStack.push(start);
 		
 		while (!exploreStack.isEmpty()) {
-			
 			let nextVert = exploreStack.pop();
-			
 			if (!explored[nextVert]){
-				
 				explored[nextVert] = true;
 				console.log(nextVert);
-				
 				for (let neighbor of this.vertices.get(nextVert)){
 					exploreStack.push(neighbor);
 				}
-				
 			}
 		}
 	};
 
+	//Prints all vertices and their adjacency lists
+	printGraph() {
+		//extract key/vals and display them
+		for (let [vertex, neighbors] of this.vertices){
+			console.log(vertex, neighbors);
+		}
+	};
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
