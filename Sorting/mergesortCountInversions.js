@@ -6,7 +6,7 @@
 const { performance } = require('perf_hooks');
 
 //recursive call -- takes left and right subarrays, sorts and counts inversions 
-function merge(left, right) {
+const merge = (left, right) => {
 
     let i = 0;
     let j = 0;
@@ -39,7 +39,7 @@ function merge(left, right) {
 }
 
 //outer level function which splits then invokes recursive calls
-function mergeSort(obj) {
+const mergeSort = (obj) => {
 
     //base case halts the recursion (finally)
     if (obj.arr.length === 1) {

@@ -98,8 +98,8 @@ const choosePivot = (arr, left, right, pivotType) => {
 //partitions the array around a pivot, so that leftside < pivot < rightside
 const partition = (arr, left, right) => {
 
-    let i = left + 1;     //i will always start one spot ahead of leftmost boundary
     let pivotPos = left;  //pivot always chosen as 1st element in this method
+    let i = left + 1;     //i will always start one spot ahead of leftmost boundary
 	
     //walk j from beginning to end, swapping smaller values backwards with i as it goes
     for (let j = left + 1; j <= right; j++) {
@@ -139,7 +139,7 @@ const quickSort = (arr, leftPos, rightPos) => {
 	//the number of comparisons is the number of spots between the boundaries
     arr.compCounter += (rightPos - leftPos);
 
-	//each call to quickSort will return a full object, with both data and counter
+	//each call to quickSort will return an object, which holds both data-array and counter
     return { 
 		"array": arr.array,
 		"compCounter": arr.compCounter
