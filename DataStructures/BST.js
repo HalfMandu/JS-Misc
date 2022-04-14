@@ -39,6 +39,7 @@ class BinarySearchTree {
             return;
         }
 		
+		//make a copy of the root to dig down from
         let currNode = this.root;
 		
 		//starting from root, start comparing to the new node
@@ -303,7 +304,7 @@ console.log("Traversing in-order...");
 bst.inOrder(bst.root);		//1, 2, 3, 5, 6, 7, 8
 
 //Getting bottom right leaf
-console.log("Geting bottom right leaf...");  
+console.log("Successor right leaf: ");  
 console.log(bst.getBottomRightLeaf(bst.root));  //8
 
 //Traversing pre-order
@@ -329,15 +330,13 @@ bst.dfsRecursive(bst.root); 	//5, 2, 1, 3, 7, 6, 8
 //Removing node
 console.log("Removing node...");  
 bst.remove(2);
-
-//Traversing in-order
-console.log("Traversing in-order...");  //8, 7, 6, 5, 3, 2, 1
+console.log("Tree after removal: ");  //8, 7, 6, 5, 3, 2, 1
 bst.inOrder(bst.root);
 
 //Inverting tree
 console.log("Inverting tree...");  //8, 7, 6, 5, 3, 2, 1
 bst.invert(bst.root);
-console.log("After inversion...");  //8, 7, 6, 5, 3, 1
+console.log("Tree after inversion: ");  //8, 7, 6, 5, 3, 1
 bst.inOrder(bst.root);
 
 
