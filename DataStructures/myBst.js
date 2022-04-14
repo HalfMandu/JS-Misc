@@ -7,6 +7,9 @@
 *		-right is a node whose value is > the value of n1
 */
 
+import { Queue } from "./Queue.js";
+import { Stack } from "./Stack.js";
+
 //Node instance
 class Node{
 	//every node knows its own value, an optional (lesser) left value, and an optional (greater) right value
@@ -127,51 +130,147 @@ class BinarySearchTree {
 		}
 	}
 	
-	//Delete a value
-	remove(value){
-		this.root = this.removeNode(this.root, value);
+	//Invert tree
+	invert(root) {
+	
+		//dig to the bottom leaves
+		let currNode = root;
+		if (currNode.left) {
+			if (currNode.right) {
+				this.invert(currNode.left);
+				this.invert(currNode.right);
+			}
+		} 
+	
+		//swap left and right
+		let temp = currNode.left;
+		currNode.left = currNode.right;
+		currNode.right = temp;
 	}
 	
-	//Delete a node
-	removeNode(node, key){
-			
-		if (node === null)
-			return null;
-
-		else if (key < node.value){
-			node.left = this.removeNode(node.left, key);
-			return node;
-		}
-
-		else if (key > node.value){
-			node.right = this.removeNode(node.right, key);
-			return node;
-		}
-
-		else {
+	//Wrapper to remove a node from the tree
+	remove(value){
+		this.root = this.findAndDeleteNode(this.root, value);
+	}
+	
+	//Search for the node (recursively) and delete it
+	findAndDeleteNode(currNode, value){
 		
-			if (node.left === null && node.right === null){
-				node = null;
-				return node;
-			}
+		//make sure node exists
+		if (!currNode) {
+			return null;
+		}
+		
+		//if found the node, delete it, otherwise keep recursing
+		if (value === currNode.value) {
+			currNode = this.deleteNode(currNode);
+		} else if (value < currNode.value) {
+			currNode.left = this.findAndDeleteNode(currNode.left, value);
+		} else {
+			currNode.right = this.findAndDeleteNode(currNode.right, value);
+		}
+		
+		//return the updated root
+		return currNode;
+	}
+	
+	//Delete a node from the tree
+	deleteNode(node){
+	
+		//node has no children
+		if (node.left === null && node.right === null) {
+            return null;
+        }
+		
+		//if children exist, recurse and reset the node in the tree
+		else if (node.left !== null && node.right !== null) {
 
-			if (node.left === null){
-				node = node.right;
-				return node;
-			}
-			
-			else if (node.right === null){
-				node = node.left;
-				return node;
-			}
+			const bottomNode = this.getBottomRightLeaf(node.left);
+            const bottomNodeValue = bottomNode.value;
 
-			let aux = this.findMinNode(node.right);
-			node.value = aux.value;
+            node = this.findAndDeleteNode(node, bottomNodeValue);
+            node.value = bottomNodeValue;
 
-			node.right = this.removeNode(node.right, aux.value);
-			return node;
+            return node;
+        } 
+		
+		//if just the left child exists, it will replace the removed node
+		else if (node.left !== null) {
+            return node.left;
+        }
+
+		//otherwise if just the right child exists, it will replace the removed node
+        return node.right;
+	}
+	
+	//BFS - breadth first search - start from the top (root) and print horizontal levels going downward
+	bfs(){
+		
+		//FIFO to govern order of discovery
+		let currNode = this.root;
+		let queue = new Queue();
+		queue.push(currNode);
+		
+		//don't finish a node until all of it's child have been queued up
+		while (!queue.isEmpty()) {
+			currNode = queue.dequeue();
+			console.log(currNode.value);
+			if (currNode.left) {
+				queue.enqueue(currNode.left);
+			}
+			if (currNode.right) {
+				queue.enqueue(currNode.right);
+			}
 		}
 	}
+	
+	//DFS - depth first search 
+	dfs() {
+	
+		let currNode = this.root;
+		let stack = new Stack();
+		stack.push(currNode);
+		
+		while (!stack.isEmpty()) {
+			currNode = stack.pop();
+			console.log(currNode.value);
+			if (currNode.left) {
+				stack.push(currNode.left);
+			}
+			if (currNode.right) {
+				stack.push(currNode.right);
+			}
+		}
+	}
+	
+	//DFS - recursive implementation
+	dfsRecursive(node) {
+				
+		console.log(node.value);
+		
+		//explore children before finish exploring self
+		if (node.left) {
+			this.dfsRecursive(node.left);
+		}
+		if (node.right) {
+			this.dfsRecursive(node.right);
+		}
+		
+	}
+		 
+	//Helper to return the lowest right leaf from a given starting node
+	getBottomRightLeaf(node) {
+	
+		//keep drilling to the right until can't anymore, then return what's found
+        let currentNode = node;
+        while (currentNode) {
+            if (currentNode.right === null) {
+                break;
+            }
+            currentNode = currentNode.right;
+        }
+        return currentNode;
+    }
 	
 }
 
@@ -197,19 +296,53 @@ bst.insert(8);
 //Searching
 let target = 5;
 console.log("Searching for target: " + target);
-console.log(bst.search(5));
+console.log(bst.search(5));  //returns found node
 
 //Traversing in-order
-console.log("Traverse in-order...");  //1, 2, 3, 5, 6, 7, 8
-bst.inOrder(bst.root);
+console.log("Traversing in-order...");  
+bst.inOrder(bst.root);		//1, 2, 3, 5, 6, 7, 8
+
+//Getting bottom right leaf
+console.log("Geting bottom right leaf...");  
+console.log(bst.getBottomRightLeaf(bst.root));  //8
 
 //Traversing pre-order
-console.log("Traverse pre-order...");  //5, 2, 1, 3, 7, 6, 8
-bst.preOrder(bst.root);
+console.log("Traversing pre-order...");  
+bst.preOrder(bst.root);		//5, 2, 1, 3, 7, 6, 8
 
 //Traversing post-order
-console.log("Traverse post-order...");  //1, 3, 2, 6, 8, 7, 5
-bst.postOrder(bst.root);
+console.log("Traversing post-order...");  
+bst.postOrder(bst.root);	//1, 3, 2, 6, 8, 7, 5
+
+//Breadth first search
+console.log("Breadth first searching...");  
+bst.bfs();		//5, 2, 7, 1, 3, 6, 8
+
+//Depth first search
+console.log("Depth first searching...");  
+bst.dfs();		//5, 7, 8, 6, 2, 3, 1
+
+//Depth first search - recursive
+console.log("Depth first searching - recursive...");  
+bst.dfsRecursive(bst.root); 	//5, 2, 1, 3, 7, 6, 8
+
+//Removing node
+console.log("Removing node...");  
+bst.remove(2);
+
+//Traversing in-order
+console.log("Traversing in-order...");  //8, 7, 6, 5, 3, 2, 1
+bst.inOrder(bst.root);
+
+//Inverting tree
+console.log("Inverting tree...");  //8, 7, 6, 5, 3, 2, 1
+bst.invert(bst.root);
+console.log("After inversion...");  //8, 7, 6, 5, 3, 1
+bst.inOrder(bst.root);
+
+
+
+
 
 
 
