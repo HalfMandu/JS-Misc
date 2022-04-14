@@ -159,22 +159,22 @@ graph.addEdge('Y', 'Z');  //these verts are seperated from the rest, unreachable
 
 graph.printGraph();
 
-console.log("BFS...");
+/* console.log("BFS...");
 graph.bfs('A');
 
 console.log("DFS...");
 graph.dfs('A', {});
 
 console.log("DFS Stack...");
-graph.dfsStack('A');
+graph.dfsStack('A'); */
 
-console.log("Removing vertex...");
+/* console.log("Removing vertex...");
 graph.removeVertex('F');
 graph.printGraph();
 
 console.log("Removing edge...");
 graph.removeEdge('B', 'C');
-graph.printGraph();
+graph.printGraph(); */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
