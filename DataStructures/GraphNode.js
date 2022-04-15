@@ -18,9 +18,9 @@ import { Stack } from "./Stack.js";
 class Graph {
 	
 	//a Graph instance keeps track of its vertices and direction type (defaults to undirected)
-	constructor(edgeDir = Graph.UNDIRECTED) {
-		this.vertices = new Map();  //keys are the unique graph vertices...mapped to their neighbor lists
-		this.edgeDir = edgeDir;     //DIRECTED, UNDIRECTED
+	constructor(edgeDir = "UNDIRECTED") {
+		this.vertices = new Map();     //keys are the unique graph vertices...mapped to their neighbor lists
+		this.edgeDir = edgeDir;        //DIRECTED, UNDIRECTED
 	}  
 	
 	//add to map new edge: (vert1 -> vert2) and return it
@@ -34,8 +34,8 @@ class Graph {
 		v1.addNeighbor(v2);
 
 		//only add a ref of v1 to v2 if graph is undirected
-		this.edgeDir === Graph.UNDIRECTED ? v2.addNeighbor(v1) : null;
-		
+		this.edgeDir === "UNDIRECTED" ? v2.addNeighbor(v1) : null;
+
 		//return the freshly added edge
 		return [v1, v2];
 	}
@@ -176,23 +176,47 @@ class Graph {
 		}
 	}
 	
+	//wrapper for dfs to discover topological sorting, iterative/straightfoward solution
+	//v is key for a sink vertex, n is the value associated to it...f(v) = n 
+	/* DFS-Loop(graph G)  	//doesn't take a start vertex...nodes start unexplored
+					current_label = n 	//to keep track of ordering
+					for each vertex v in G  //v is sink vertex
+						if v unexplored 
+							DFS(G, v)
+						set f(v) = current_label
+					current_label-- */
+	dfsLoop(graph){
+		
+		let current_label = graph.vertices.size;
+		
+		for (let vert of [...this.vertices.keys()]) {
+			//if this vert doesn't have any outbound edges, it's a sink
+			if (this.vertices.get(vert).neighbors.length < 1){
+				console.log("found sink: " + vert, this.vertices.get(vert));
+				if () {
+					this.dfs(vert);
+				}
+			}
+		} 
+		
+	}
+	
 	//display the current state of Graph
 	printGraph(){
 	
 		console.log("GRAPH: ");
-		console.log(this.vertices.entries());
+		for (let [vertex, neighbors] of this.vertices){
+			console.log(vertex, neighbors);
+		}
 		
 	}
 		
 }
 
-Graph.UNDIRECTED = Symbol('directed graph');  // two-way edges
-Graph.DIRECTED = Symbol('undirected graph');  // one-way edges
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Driver
 
-const graph = new Graph(Graph.UNDIRECTED);
+const graph = new Graph("DIRECTED");
 
 const [firstEdge] = graph.addEdge(1, 2);
 graph.addEdge(1, 3);
@@ -204,15 +228,19 @@ graph.addEdge(8, 4);
 graph.addEdge(9, 5);
 graph.addEdge(10, 6);
 
-console.log("Running BFS...");
+graph.printGraph();
 
-graph.bfs(firstEdge);
+console.log("DFS loop: ");
+graph.dfsLoop(graph);
+
+//console.log("Running BFS...");
+//graph.bfs(firstEdge);
 
 /////////////////////////////////////////////
 
-console.log("Running BFS gen...");
+//console.log("Running BFS gen...");
 
-let bsf2 = graph.bfsGen(firstEdge);
+/* let bsf2 = graph.bfsGen(firstEdge);
 
 console.log(bsf2.next().value.value); // 1
 console.log(bsf2.next().value.value); // 2
@@ -224,11 +252,11 @@ console.log(bsf2.next().value.value); // 7
 console.log(bsf2.next().value.value); // 8
 console.log(bsf2.next().value.value); // 9
 console.log(bsf2.next().value.value); // 10 
-//console.log(bsf2.next().value.value); // error
+ *///console.log(bsf2.next().value.value); // error
 
 /////////////////////////////////////////////
 
-console.log("Running DFS...");
+//console.log("Running DFS...");
 
 /* let dfsFromFirst = graph.dfsGen(firstEdge);
 let exploredOrder = Array.from(dfsFromFirst);
@@ -240,11 +268,11 @@ const values2 = exploredOrder.map(vertex => vertex.value);
 console.log(values2);	// [1, 4, 8, 3, 7, 6, 10, 2, 5, 9] 
 */
 
-console.log("DFS stack: ");
+/* console.log("DFS stack: ");
 graph.dfs(firstEdge);
 
 console.log("DFS recursive: ");
-graph.dfsRecursive(firstEdge, {});
+graph.dfsRecursive(firstEdge, {}); */
 
 /////////////////////////////////////////////
 

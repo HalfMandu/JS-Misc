@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "jest test --watch",
-    "start": "node DataStructures/myBst"
+    "start": "node DataStructures/GraphNode"
   },
   "author": "SR",
   "license": "ISC",
