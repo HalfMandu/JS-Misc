@@ -2,9 +2,13 @@
 *	Graph
 *   Stephen Rinkus 
 *
-*	A Graph implementation which uses Vertex objects to represent nodes in the graph.
-*	This implementation handles directed and undirected graphs.
-*	Queue and Stack are used for BFS/DFS.
+*	A Graph implementation which uses Vertex objects to represent nodes in the graph
+*	Each map key is an int, and is mapped to a Vertex object
+* 	Each Vertex object has: 
+*		an int value (representing itself)
+*		an array of Vertex objects (representing adjacent vertices)
+*	This implementation handles directed and undirected graphs
+*	Queue and Stack are used for BFS/DFS
 *  	
 */
 
@@ -19,11 +23,11 @@ class Graph {
 	
 	//a Graph instance keeps track of its vertices and direction type (defaults to undirected)
 	constructor(edgeDir = "UNDIRECTED") {
-		this.vertices = new Map();     //keys are the unique graph vertices...mapped to their neighbor lists
-		this.edgeDir = edgeDir;        //DIRECTED, UNDIRECTED
+		this.vertices = new Map();   //int keys are the unique graph vertices, mapped to Vertex objects
+		this.edgeDir = edgeDir;      //DIRECTED, UNDIRECTED
 	}  
 	
-	//add to map new edge: (vert1 -> vert2) and return it
+	//add to map new edge: (int vert1 -> int vert2) and return it
 	addEdge(vert1, vert2) {
 	
 		//add vert1 and vert2 keys to the map
@@ -40,7 +44,7 @@ class Graph {
 		return [v1, v2];
 	}
 	
-	//add a vertex node to the graph and return it
+	//add a vertex key (int) to the graph and return the Vertex object
 	addVertex(vertexKey) {
 	
 		//if it already exists, just return its value, otherwise create a new node and set it
@@ -55,33 +59,41 @@ class Graph {
 	
 	//delete a vertex from the map and return deleted vertex
 	removeVertex(vertexKey) {
-	
-		//console.log([...this.vertices.values()]);
-	
+		
+		//make sure it exists
 		if (this.vertices.has(vertexKey)) {
 		
-			console.log("removing: " + vertexKey);
-		
-			//only remove neighbor if they are neighbors to begin with
-			/* for (let neighbor of this.vertices.get(vertexKey)) {
-				neighbor.removeNeighbor(vertexKey);
-			} */
+			let targetVert = this.vertices.get(vertexKey);
+			
+			//only remove neighbor if they are neighbors to begin with...only works in undirected case
+			if (this.edgeDir === "UNDIRECTED"){
+				for (let neighbor of targetVert.getNeighbors()) {
+					this.vertices.get(neighbor.value).removeNeighbor(targetVert); 
+				} 			
+			}
+			
+			//directed case - check all adajaceny lists and delete any reference 
+			for (let vert of this.vertices.keys()) {
+				if (this.vertices.get(vert).isNeighbor(vertexKey)){
+					this.vertices.get(vert).removeNeighbor(targetVert);
+				}
+			}
 		}
 		
 		//finally, delete now-defunct vertex key from the map
 		return this.vertices.delete(vertexKey);
 	}
 	
-	//delete edge (vert1, vert2), and return deleted edge
+	//delete edge (int vert1, int vert2), and return deleted edge
 	removeEdge(vert1, vert2) {
 	
 		const v1 = this.vertices.get(vert1);
 		const v2 = this.vertices.get(vert2);
 
 		//if they exist and are adjacent, remove their mutual refs
-		if (v1 && v2 && this.isNeighbor(v2)) {
+		if (v1 && v2 && v1.isNeighbor(v2)) {
 			v1.removeNeighbor(v2);  //remove one neighbor (v2) from v1's list
-			this.edgeDir === Graph.UNDIRECTED ? v2.removeNeighbor(v1) : null;
+			this.edgeDir === "UNDIRECTED" ? v2.removeNeighbor(v1) : null;
 		}
 
 		return [v1, v2];
@@ -185,7 +197,7 @@ class Graph {
 							DFS(G, v)
 						set f(v) = current_label
 					current_label-- */
-	dfsLoop(graph){
+/* 	dfsLoop(graph){
 		
 		let current_label = graph.vertices.size;
 		
@@ -199,7 +211,7 @@ class Graph {
 			}
 		} 
 		
-	}
+	} */
 	
 	//display the current state of Graph
 	printGraph(){
@@ -216,7 +228,8 @@ class Graph {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Driver
 
-const graph = new Graph("DIRECTED");
+//DIRECTED, UNDIRECTED
+const graph = new Graph("UNDIRECTED");
 
 const [firstEdge] = graph.addEdge(1, 2);
 graph.addEdge(1, 3);
@@ -230,8 +243,8 @@ graph.addEdge(10, 6);
 
 graph.printGraph();
 
-console.log("DFS loop: ");
-graph.dfsLoop(graph);
+//console.log("DFS loop: ");
+//graph.dfsLoop(graph);
 
 //console.log("Running BFS...");
 //graph.bfs(firstEdge);
@@ -252,7 +265,7 @@ console.log(bsf2.next().value.value); // 7
 console.log(bsf2.next().value.value); // 8
 console.log(bsf2.next().value.value); // 9
 console.log(bsf2.next().value.value); // 10 
- *///console.log(bsf2.next().value.value); // error
+*///console.log(bsf2.next().value.value); // error
 
 /////////////////////////////////////////////
 
@@ -274,10 +287,15 @@ graph.dfs(firstEdge);
 console.log("DFS recursive: ");
 graph.dfsRecursive(firstEdge, {}); */
 
+//Removals
+console.log("Removing vertex...");
+graph.removeVertex(3);
+//console.log("Removing edge...");
+//graph.removeEdge(10, 6);
+graph.printGraph();
+
 /////////////////////////////////////////////
 
-//test remove 
-//graph.removeVertex(10);
 
 
 

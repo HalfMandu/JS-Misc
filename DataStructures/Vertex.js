@@ -5,17 +5,17 @@ class Vertex {
 	//each vertex holds that vertex’s value along with a list of it's adjacent vertices
 	constructor(value) {
 		this.value = value;
-		this.neighbors = [];   // adjacency list
+		this.neighbors = [];   // adjacency list, each element is a Vertex object 
 	}
 	
-	//append a vertex/node to end of adjacency list
+	//append a Vertex object to end of adjacency list
 	addNeighbor(vertex) {
 		this.neighbors.push(vertex);  //push() natively returns the new length of array
 	}
 	
-	//if it exists, delete it and return deleted vertex
+	//if Vertex object exists as a neighbor, delete it and return it
 	removeNeighbor(vertex) {
-		if (this.neighbors.has(vertex)) {
+		if (this.neighbors.includes(vertex)) {
 			this.neighbors.splice(this.neighbors.indexOf(vertex), 1);  //remove it from the list
 			return vertex;
 		}
@@ -26,9 +26,13 @@ class Vertex {
 		return this.neighbors;
 	}
 
-	//boolean check if a vertex is in the neighbors list
+	//boolean check if a vertex int key has a Vertex in the neighbors list
 	isNeighbor(vertex) {
-		return this.neighbors.has(vertex);
+		if ([...this.neighbors].some(neighbor => neighbor.value === vertex)){
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }
