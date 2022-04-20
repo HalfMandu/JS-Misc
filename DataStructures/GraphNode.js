@@ -57,6 +57,21 @@ class Graph {
 		}
 	}
 	
+	//Delete edge (int vert1, int vert2), and return deleted edge
+	removeEdge(vert1, vert2) {
+	
+		const v1 = this.vertices.get(vert1);
+		const v2 = this.vertices.get(vert2);
+
+		//if they exist and are adjacent, remove their mutual refs
+		if (v1 && v2 && v1.isNeighbor(v2)) {
+			v1.removeNeighbor(v2);  //remove one neighbor (v2) from v1's list
+			this.edgeDir === "UNDIRECTED" ? v2.removeNeighbor(v1) : null;
+		}
+
+		return [v1, v2];
+	}
+	
 	//Delete a vertex from the map and return deleted vertex
 	removeVertex(vertexKey) {
 		
@@ -82,22 +97,7 @@ class Graph {
 		
 		//finally, delete now-defunct vertex key from the map
 		return this.vertices.delete(vertexKey);
-	}
-	
-	//Delete edge (int vert1, int vert2), and return deleted edge
-	removeEdge(vert1, vert2) {
-	
-		const v1 = this.vertices.get(vert1);
-		const v2 = this.vertices.get(vert2);
-
-		//if they exist and are adjacent, remove their mutual refs
-		if (v1 && v2 && v1.isNeighbor(v2)) {
-			v1.removeNeighbor(v2);  //remove one neighbor (v2) from v1's list
-			this.edgeDir === "UNDIRECTED" ? v2.removeNeighbor(v1) : null;
-		}
-
-		return [v1, v2];
-	}
+	}	
 	
 	//Breadth first search - takes in a Vertex object
 	bfs(firstVert) {
@@ -121,9 +121,7 @@ class Graph {
 	
 	//Depth first search, similar to bfs except using Stack to explore
 	dfs(firstVert) {
-	
-		console.log("DFS value: " + firstVert.value);
-		
+			
 		const explored = new Map();	   //keeps track of which vertices have been visited
 		const toExplore = new Stack(); //governs (LIFO) order of exploration for the remaining vertices
 
@@ -289,7 +287,9 @@ class Graph {
 	
 	//Display the current state of Graph
 	printGraph(){
-		console.log("GRAPH: ");
+		
+		console.log(this.edgeDir + " GRAPH: ");
+		
 		for (let [vertex, neighbors] of this.vertices){
 			console.log(vertex, neighbors);
 		}
@@ -299,19 +299,18 @@ class Graph {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Driver
 
-/** 	UNDIRECTED - 8 edges, 9 nodes
+/** 	UNDIRECTED - 9 edges, 10 nodes
 	*
 	*           1
 	*         / | \
 	*       2   3  4
 	*      /   / \  \
 	*     5   6   7  8
-	*    /      
-	*   9     	   		     
+	*    /    |   
+	*   9     10	   		     
 	*         
 */
-
-/** const graph = new Graph("UNDIRECTED");
+const graph = new Graph("UNDIRECTED");
 const [firstVert] = graph.addEdge(1, 2);
 graph.addEdge(1, 3);
 graph.addEdge(1, 4);
@@ -319,8 +318,9 @@ graph.addEdge(5, 2);
 graph.addEdge(6, 3);
 graph.addEdge(7, 3);
 graph.addEdge(8, 4);
-graph.addEdge(9, 5);  */
-//graph.addEdge(10, 6);
+graph.addEdge(9, 5);  
+graph.addEdge(10, 6);
+graph.printGraph();
 
 /** 	DIRECTED - 11 edges, 9 nodes
 	*
@@ -334,8 +334,7 @@ graph.addEdge(9, 5);  */
 	*         
 	*         
 */
-/** const dirGraph = new Graph("DIRECTED");
-
+const dirGraph = new Graph("DIRECTED");
 const [firstVertDir] = dirGraph.addEdge(1, 2);
 dirGraph.addEdge(1, 3);
 dirGraph.addEdge(1, 4);
@@ -347,7 +346,6 @@ dirGraph.addEdge(4, 7);
 dirGraph.addEdge(5, 7);
 dirGraph.addEdge(5, 8);
 dirGraph.addEdge(7, 9); 
-
 dirGraph.printGraph();
 
 console.log("Topological Sort: ");
@@ -355,54 +353,44 @@ console.log(dirGraph.topologicalSort());
 
 console.log("Topological Sort (Stack): ");
 dirGraph.topologicalSortStack();
- */
 
-/** console.log("Running BFS...");
+console.log("BFS: ");
 graph.bfs(firstVert); 
-*/
 
-/** 
-console.log("Running BFS gen...");
+console.log("BFS with generator: ");
+let bsfVals = graph.bfsGen(firstVert);
+console.log(bsfVals.next().value.value); // 1
+console.log(bsfVals.next().value.value); // 2
+console.log(bsfVals.next().value.value); // 3
+console.log(bsfVals.next().value.value); // 4
+console.log(bsfVals.next().value.value); // 5
+console.log(bsfVals.next().value.value); // 6
+console.log(bsfVals.next().value.value); // 7
+console.log(bsfVals.next().value.value); // 8
+console.log(bsfVals.next().value.value); // 9
+console.log(bsfVals.next().value.value); // 10 
+//console.log(bsfVals.next().value.value); // error
 
-let bsf2 = graph.bfsGen(firstVert);
+console.log("DFS with generator: ");
+console.log([...graph.dfsGen(firstVert)].map(vertex => vertex.value));	// [1, 4, 8, 3, 7, 6, 10, 2, 5, 9] 
 
-console.log(bsf2.next().value.value); // 1
-console.log(bsf2.next().value.value); // 2
-console.log(bsf2.next().value.value); // 3
-console.log(bsf2.next().value.value); // 4
-console.log(bsf2.next().value.value); // 5
-console.log(bsf2.next().value.value); // 6
-console.log(bsf2.next().value.value); // 7
-console.log(bsf2.next().value.value); // 8
-console.log(bsf2.next().value.value); // 9
-console.log(bsf2.next().value.value); // 10 
-//console.log(bsf2.next().value.value); // error
-*/
-
-//console.log("Running DFS...");
-
-/** let exploredOrder = Array.from(graph.dfsGen(firstVert));
-const values = exploredOrder.map(vertex => vertex.value);
-console.log(values);	// [1, 4, 8, 3, 7, 6, 10, 2, 5, 9] 
-*/
- 
-/** console.log("DFS stack: ");
+console.log("DFS stack: ");
 graph.dfs(firstVert);
 
 console.log("DFS recursive: ");
-graph.dfsRecursive(firstVert, {});  */
+graph.dfsRecursive(firstVert, {}); 
 
 //Helpers
 
-/** 
 console.log("Removing vertex...");
 graph.removeVertex(3); 
+
 console.log("Removing edge...");
 graph.removeEdge(10, 6);
-graph.printGraph(); 
-*/
 
- /** console.log(graph.contains(5));		//true
+graph.printGraph(); 
+
+console.log(graph.contains(5));		//true
 console.log(graph.contains(11));	//false
 console.log(graph.hasEdge(5, 2));	//true
 console.log(graph.hasEdge(5, 3));	//false */
