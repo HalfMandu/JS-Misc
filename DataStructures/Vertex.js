@@ -26,13 +26,17 @@ class Vertex {
 		return this.neighbors;
 	}
 
-	//boolean check if a vertex int key has a Vertex in the neighbors list
+	//boolean check if a Vertex object has another Vertex object in its neighbors list
 	isNeighbor(vertex) {
-		if ([...this.neighbors].some(neighbor => neighbor.value === vertex)){
-			return true;
-		} else {
-			return false;
-		}
+		return this.neighbors.includes(vertex);
+	}
+	
+	//display a vertex's neighbors
+	printNeighbors(vertex){
+		console.log("PRINTING NEIGHBORS FOR VERTEX " + vertex);
+		for (let neighbor of this.neighbors) {
+			console.log("neighbor: " + neighbor.value);
+		} 	
 	}
 
 }

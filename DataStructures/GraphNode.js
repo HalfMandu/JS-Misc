@@ -21,16 +21,16 @@ import { Stack } from "./Stack.js";
 
 class Graph {
 	
-	//a Graph instance keeps track of its vertices and direction type (defaults to undirected)
+	//Each Graph instance keeps track of its vertices and direction type (defaults to undirected)
 	constructor(edgeDir = "UNDIRECTED") {
 		this.vertices = new Map();   //int keys are the unique graph vertices, mapped to Vertex objects
 		this.edgeDir = edgeDir;      //DIRECTED, UNDIRECTED
 	}  
 	
-	//add to map new edge: (int vert1 -> int vert2) and return it
+	//Add to map new edge: (int vert1 -> int vert2) and returns an array of two Vertex objs [v1, v2]
 	addEdge(vert1, vert2) {
 	
-		//add vert1 and vert2 keys to the map
+		//add vert1 and vert2 keys to the map (if they don't already exist)
 		const v1 = this.addVertex(vert1);   
 		const v2 = this.addVertex(vert2);  
 		
@@ -44,10 +44,10 @@ class Graph {
 		return [v1, v2];
 	}
 	
-	//add a vertex key (int) to the graph and return the Vertex object
+	//Add a vertex key (int) to the graph and return the Vertex object
 	addVertex(vertexKey) {
 	
-		//if it already exists, just return its value, otherwise create a new node and set it
+		//if it already exists, just return the Vertex obj, otherwise create a new node and set it
 		if (this.vertices.has(vertexKey)) {
 			return this.vertices.get(vertexKey);
 		} else {
@@ -57,7 +57,7 @@ class Graph {
 		}
 	}
 	
-	//delete a vertex from the map and return deleted vertex
+	//Delete a vertex from the map and return deleted vertex
 	removeVertex(vertexKey) {
 		
 		//make sure it exists
@@ -68,13 +68,13 @@ class Graph {
 			//only remove neighbor if they are neighbors to begin with...only works in undirected case
 			if (this.edgeDir === "UNDIRECTED"){
 				for (let neighbor of targetVert.getNeighbors()) {
-					this.vertices.get(neighbor.value).removeNeighbor(targetVert); 
+					neighbor.removeNeighbor(targetVert); 
 				} 			
 			}
 			
 			//directed case - check all adajaceny lists and delete any reference 
-			for (let vert of this.vertices.keys()) {
-				if (this.vertices.get(vert).isNeighbor(vertexKey)){
+			for (let [vert] of this.vertices){
+				if (this.vertices.get(vert).isNeighbor(targetVert)){
 					this.vertices.get(vert).removeNeighbor(targetVert);
 				}
 			}
@@ -84,7 +84,7 @@ class Graph {
 		return this.vertices.delete(vertexKey);
 	}
 	
-	//delete edge (int vert1, int vert2), and return deleted edge
+	//Delete edge (int vert1, int vert2), and return deleted edge
 	removeEdge(vert1, vert2) {
 	
 		const v1 = this.vertices.get(vert1);
@@ -99,18 +99,18 @@ class Graph {
 		return [v1, v2];
 	}
 	
-	//breadth first search
-	bfs(first) {
+	//Breadth first search - takes in a Vertex object
+	bfs(firstVert) {
 		
 		const explored = new Map();     //keeps track of which vertices have been visited
 		const toExplore = new Queue();  //governs (FIFO) order of exploration for the remaining vertices
 
-		toExplore.enqueue(first);       //begin the search with the root element of the graph
+		toExplore.enqueue(firstVert);       //queue up the root element to explore from
 		
-		//while there are still vertices to explore, keep recursing
+		//while there are still vertices to explore, keep digging
 		while (!toExplore.isEmpty()) {
 			const nextVertex = toExplore.dequeue();
-			//if the vertex exists and the map hasn't seen it yet, explore it and recurse its neighbors
+			//if the vertex exists and the map hasn't seen it yet, explore it and queue up its neighbors
 			if (nextVertex && !explored.has(nextVertex)) {
 				explored.set(nextVertex);    //mark as visited
 				nextVertex.getNeighbors().forEach(neighbor => toExplore.enqueue(neighbor));
@@ -119,13 +119,15 @@ class Graph {
 		}
 	}
 	
-	//depth first search, similar to bfs except using Stack to explore
-	dfs(first) {
+	//Depth first search, similar to bfs except using Stack to explore
+	dfs(firstVert) {
 	
+		console.log("DFS value: " + firstVert.value);
+		
 		const explored = new Map();	   //keeps track of which vertices have been visited
 		const toExplore = new Stack(); //governs (LIFO) order of exploration for the remaining vertices
 
-		toExplore.push(first);
+		toExplore.push(firstVert);
 
 		while (!toExplore.isEmpty()) {
 			const nextVertex = toExplore.pop();
@@ -137,7 +139,7 @@ class Graph {
 		}
 	}
 	
-	//depth first search - recursive implementation
+	//Depth first search - recursive implementation
 	dfsRecursive(start, explored) {
 		
 		//explored begins as empty {}
@@ -152,7 +154,7 @@ class Graph {
 		}		
 	};
 	
-	//js generator, iterating one val at a time, good for large graphs 
+	//JS generator, iterating one val at a time, good for large graphs 
 	*bfsGen(first) {
 	
 		const explored = new Map();    
@@ -170,7 +172,7 @@ class Graph {
 		}
 	}
 	
-	//depth first search, similar to bfs except using Stack to explore
+	//Depth first search, similar to bfs except using Stack to explore
 	*dfsGen(first) {
 	
 		const explored = new Map();	   
@@ -188,72 +190,181 @@ class Graph {
 		}
 	}
 	
-	//wrapper for dfs to discover topological sorting, iterative/straightfoward solution
-	//v is key for a sink vertex, n is the value associated to it...f(v) = n 
-	/* DFS-Loop(graph G)  	//doesn't take a start vertex...nodes start unexplored
-					current_label = n 	//to keep track of ordering
-					for each vertex v in G  //v is sink vertex
-						if v unexplored 
-							DFS(G, v)
-						set f(v) = current_label
-					current_label-- */
-/* 	dfsLoop(graph){
-		
-		let current_label = graph.vertices.size;
-		
-		for (let vert of [...this.vertices.keys()]) {
-			//if this vert doesn't have any outbound edges, it's a sink
-			if (this.vertices.get(vert).neighbors.length < 1){
-				console.log("found sink: " + vert, this.vertices.get(vert));
-				if () {
-					this.dfs(vert);
-				}
+	//Helper for topologicalSort() to recurse on a vertex
+	topSortRecurser(vertex, numVerts, explored, order) {
+	   
+		//visit this vert
+		explored[vertex] = true;
+	   	   
+		//check each neighbor -- if they aren't explored, recurse on them
+		for (let neighbor of this.vertices.get(vertex).getNeighbors()){
+			if (!explored[neighbor.value]) {
+				numVerts = this.topSortRecurser(neighbor.value, numVerts, explored, order);
 			}
 		} 
 		
-	} */
+		//we can put the vertex in its rightful place now
+		order[vertex] = numVerts;
+		return numVerts - 1;
+	}
 	
-	//display the current state of Graph
+	//Instead of using a Stack, this approach passes the information forward with parameters
+	topologicalSort(){
+	
+		let explored = {};		//keeps track of which verts have been visited
+		let order = {};			//object tracking vertices to their final order position
+		let numVerts = [...this.vertices.keys()].length - 1;
+		
+		//For every unvisited vertex, explore it and neighors
+		for (let [vertex] of this.vertices){	
+			if (!explored[vertex]) {
+				this.topSortRecurser(vertex, numVerts, explored, order);
+			}
+		};
+		
+		return order;
+	}
+	
+	//Helper for topologicalSortStack() to recurse on a vertex
+	topSortStackRecurser(vertex, explored, stack) {
+	   
+		//visit this vert
+		explored[vertex] = true;
+	   	   
+		//check each neighbor -- if they aren't explored, recurse on them
+		for (let neighbor of this.vertices.get(vertex).getNeighbors()){
+			if (!explored[neighbor.value]) {
+				this.topSortStackRecurser(neighbor.value, explored, stack);
+			}
+		} 
+
+		//only push to the stack when vert's neighbors have been recursed on
+		stack.push(vertex);
+	}
+
+	//Retun an ordering of the vertices such that for every directed edge (u, v), u comes before v
+	topologicalSortStack() {
+	
+		let stack = new Stack();  //Stack to govern LIFO exploration
+		let explored = {};		  //keeps track of which verts have been visited
+
+		//For every unvisited vertex, explore it and neighors
+		for (let [vertex] of this.vertices){	
+			if (!explored[vertex]) {
+				this.topSortStackRecurser(vertex, explored, stack);
+			}
+		};
+		
+		while (!stack.isEmpty()) {
+			console.log(stack.pop());
+		}
+	}
+	
+	//Return a sink vertex
+	getSink(){
+	
+		//returns the first sink it finds
+		for (let [vert] of this.vertices){
+			if (this.vertices.get(vert).getNeighbors().length < 1){
+				return this.vertices.get(vert);
+			}
+		}
+	};
+	
+	//Map already tells if a key is present
+	contains(value){ 
+		return this.vertices.has(value);
+	};
+	
+	//Check if graph holds a certain edge
+	hasEdge(v1, v2){ 
+		
+		//if v1 exists, check if v2 is one of its neighbors
+		if (this.vertices.has(v1)){
+			return this.vertices.get(v1).isNeighbor(this.vertices.get(v2));
+		}
+		
+		return false;
+	};
+	
+	//Display the current state of Graph
 	printGraph(){
-	
 		console.log("GRAPH: ");
 		for (let [vertex, neighbors] of this.vertices){
 			console.log(vertex, neighbors);
 		}
-		
 	}
-		
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Driver
 
-//DIRECTED, UNDIRECTED
-const graph = new Graph("UNDIRECTED");
+/** 	UNDIRECTED - 8 edges, 9 nodes
+	*
+	*           1
+	*         / | \
+	*       2   3  4
+	*      /   / \  \
+	*     5   6   7  8
+	*    /      
+	*   9     	   		     
+	*         
+*/
 
-const [firstEdge] = graph.addEdge(1, 2);
+/** const graph = new Graph("UNDIRECTED");
+const [firstVert] = graph.addEdge(1, 2);
 graph.addEdge(1, 3);
 graph.addEdge(1, 4);
 graph.addEdge(5, 2);
 graph.addEdge(6, 3);
 graph.addEdge(7, 3);
 graph.addEdge(8, 4);
-graph.addEdge(9, 5);
-graph.addEdge(10, 6);
+graph.addEdge(9, 5);  */
+//graph.addEdge(10, 6);
 
-graph.printGraph();
+/** 	DIRECTED - 11 edges, 9 nodes
+	*
+	*           1
+	*        / |  \
+	*      2  3 -> 4
+	*     / \ |    |
+	*    6   5 ->  7
+	*        |     |
+	*        8 	   9
+	*         
+	*         
+*/
+/** const dirGraph = new Graph("DIRECTED");
 
-//console.log("DFS loop: ");
-//graph.dfsLoop(graph);
+const [firstVertDir] = dirGraph.addEdge(1, 2);
+dirGraph.addEdge(1, 3);
+dirGraph.addEdge(1, 4);
+dirGraph.addEdge(2, 6);
+dirGraph.addEdge(2, 5);
+dirGraph.addEdge(3, 4);
+dirGraph.addEdge(3, 5);
+dirGraph.addEdge(4, 7);
+dirGraph.addEdge(5, 7);
+dirGraph.addEdge(5, 8);
+dirGraph.addEdge(7, 9); 
 
-//console.log("Running BFS...");
-//graph.bfs(firstEdge);
+dirGraph.printGraph();
 
-/////////////////////////////////////////////
+console.log("Topological Sort: ");
+console.log(dirGraph.topologicalSort());
 
-//console.log("Running BFS gen...");
+console.log("Topological Sort (Stack): ");
+dirGraph.topologicalSortStack();
+ */
 
-/* let bsf2 = graph.bfsGen(firstEdge);
+/** console.log("Running BFS...");
+graph.bfs(firstVert); 
+*/
+
+/** 
+console.log("Running BFS gen...");
+
+let bsf2 = graph.bfsGen(firstVert);
 
 console.log(bsf2.next().value.value); // 1
 console.log(bsf2.next().value.value); // 2
@@ -265,39 +376,36 @@ console.log(bsf2.next().value.value); // 7
 console.log(bsf2.next().value.value); // 8
 console.log(bsf2.next().value.value); // 9
 console.log(bsf2.next().value.value); // 10 
-*///console.log(bsf2.next().value.value); // error
-
-/////////////////////////////////////////////
+//console.log(bsf2.next().value.value); // error
+*/
 
 //console.log("Running DFS...");
 
-/* let dfsFromFirst = graph.dfsGen(firstEdge);
-let exploredOrder = Array.from(dfsFromFirst);
+/** let exploredOrder = Array.from(graph.dfsGen(firstVert));
 const values = exploredOrder.map(vertex => vertex.value);
 console.log(values);	// [1, 4, 8, 3, 7, 6, 10, 2, 5, 9] 
-
-let exploredOrder2 = Array.from(dfsFromFirst);
-const values2 = exploredOrder.map(vertex => vertex.value);
-console.log(values2);	// [1, 4, 8, 3, 7, 6, 10, 2, 5, 9] 
 */
-
-/* console.log("DFS stack: ");
-graph.dfs(firstEdge);
+ 
+/** console.log("DFS stack: ");
+graph.dfs(firstVert);
 
 console.log("DFS recursive: ");
-graph.dfsRecursive(firstEdge, {}); */
+graph.dfsRecursive(firstVert, {});  */
 
-//Removals
+//Helpers
+
+/** 
 console.log("Removing vertex...");
-graph.removeVertex(3);
-//console.log("Removing edge...");
-//graph.removeEdge(10, 6);
-graph.printGraph();
+graph.removeVertex(3); 
+console.log("Removing edge...");
+graph.removeEdge(10, 6);
+graph.printGraph(); 
+*/
 
-/////////////////////////////////////////////
-
-
-
+ /** console.log(graph.contains(5));		//true
+console.log(graph.contains(11));	//false
+console.log(graph.hasEdge(5, 2));	//true
+console.log(graph.hasEdge(5, 3));	//false */
 
 
 

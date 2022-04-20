@@ -12,11 +12,11 @@ import { Stack } from "./Stack.js";
 
 //Node instance
 class Node{
-	//every node knows its own value, an optional (lesser) left value, and an optional (greater) right value
+	//every Node knows its own value, an optional (lesser) left Node, and an optional (greater) right Node
 	constructor(value) {
-		this.value = value;
-		this.left = null;
-		this.right = null;
+		this.value = value;	//int value
+		this.left = null;	//Node object
+		this.right = null;  //Node object
 	}
 }
 
@@ -136,11 +136,9 @@ class BinarySearchTree {
 	
 		//dig to the bottom leaves
 		let currNode = root;
-		if (currNode.left) {
-			if (currNode.right) {
-				this.invert(currNode.left);
-				this.invert(currNode.right);
-			}
+		if (currNode.left && currNode.right) {
+			this.invert(currNode.left);
+			this.invert(currNode.right);
 		} 
 	
 		//swap left and right
@@ -299,13 +297,13 @@ let target = 5;
 console.log("Searching for target: " + target);
 console.log(bst.search(5));  //returns found node
 
-//Traversing in-order
-console.log("Traversing in-order...");  
-bst.inOrder(bst.root);		//1, 2, 3, 5, 6, 7, 8
-
 //Getting bottom right leaf
 console.log("Successor right leaf: ");  
 console.log(bst.getBottomRightLeaf(bst.root));  //8
+
+//Traversing in-order
+console.log("Traversing in-order...");  
+bst.inOrder(bst.root);		//1, 2, 3, 5, 6, 7, 8
 
 //Traversing pre-order
 console.log("Traversing pre-order...");  
@@ -338,12 +336,4 @@ console.log("Inverting tree...");  //8, 7, 6, 5, 3, 2, 1
 bst.invert(bst.root);
 console.log("Tree after inversion: ");  //8, 7, 6, 5, 3, 1
 bst.inOrder(bst.root);
-
-
-
-
-
-
-
-
 

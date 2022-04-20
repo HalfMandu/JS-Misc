@@ -130,6 +130,13 @@ class Graph {
 		}
 	};
 
+	//check if graph holds a certain value
+	contains(value){ };
+	
+	//check if graph holds a certain edge
+	hasEdge(edge){ };
+	
+	
 	//Prints all vertices and their adjacency lists
 	printGraph() {
 		//extract key/vals and display them
@@ -137,6 +144,7 @@ class Graph {
 			console.log(vertex, neighbors);
 		}
 	};
+	
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
