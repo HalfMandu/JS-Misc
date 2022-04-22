@@ -1,8 +1,8 @@
 /* 
-* 	Undirected Graph
+* 	Graph
 *   Stephen Rinkus
 * 
-*	This Graph implementation uses just an Array of ints to store vertice lists (no extra class for Node)
+*	This Graph implementation uses a map to associate int keys with vertice arrays
 */
 
 import { Queue } from "./Queue.js";
@@ -11,9 +11,9 @@ import { Stack } from "./Stack.js";
 class Graph {
 	
 	//Each graph instance has a mapping of vertices to their adjacents...(int key, [] neighbors)
-	constructor(numVerts) {
-		this.numVerts = numVerts;
+	constructor(graphType = "UNDIRECTED") {
 		this.vertices = new Map();
+		this.graphType = graphType;  //DIRECTED, UNDIRECTED
 	};
 
 	//Add a vertex to the graph...
@@ -37,7 +37,7 @@ class Graph {
 		//if they don't already reference eachother, make them
 		if (!(this.vertices.get(v1)).includes(v2)){
 			this.vertices.get(v1).push(v2);
-			this.vertices.get(v2).push(v1);
+			this.graphType === "UNDIRECTED" ? this.vertices.get(v2).push(v1) : null;
 		}
 		
 	};
@@ -64,7 +64,7 @@ class Graph {
 		//remove v1 and v2's refs to each other (if they both exist and are neighbors)
 		if (this.vertices.has(v1) && this.vertices.has(v2) && this.vertices.get(v1).includes(v2)){
 			this.vertices.get(v1).splice(this.vertices.get(v1).indexOf(v2), 1); 
-			this.vertices.get(v2).splice(this.vertices.get(v2).indexOf(v1), 1); 
+			this.graphType === "UNDIRECTED" ? this.vertices.get(v2).splice(this.vertices.get(v2).indexOf(v1), 1) : null;
 		}
 		
 	};
@@ -129,16 +129,68 @@ class Graph {
 			}
 		}
 	};
-
+	
+	//Helper for topologicalSort() to recurse on a vertex and track levels of precedence
+	topSortRecurser(vertex, numVerts, explored, order) {
+	   
+		//visit this vert
+		explored[vertex] = true;
+	   	
+		let neighbors = this.vertices.get(vertex);
+		
+		//check each neighbor -- if they aren't explored, recurse on them and update vert counter
+		for (let neighbor of this.vertices.get(vertex)){
+			if (!explored[neighbor]) {
+				numVerts = this.topSortRecurser(neighbor, numVerts, explored, order);
+			}
+		} 
+		
+		//when there's no more outbound arcs, decrement size and put the vertex in its rightful place now
+		order[numVerts] = vertex;
+		return numVerts - 1;
+	}
+	
+	//This approach passes the information forward with parameters
+	topologicalSort(){
+	
+		let explored = {};		//keeps track of which verts have been visited
+		let order = {};			//object tracking vertices to their final order position
+		let numVerts = this.vertices.size;
+				
+		//For every unvisited vertex, explore it and neighors
+		for (let [vertex] of this.vertices){	
+			if (!explored[vertex]) {
+				this.topSortRecurser(vertex, numVerts, explored, order);
+			}
+		};
+				
+		return order;
+	}
+	
+	//Reverse all of the arcs -- transpose graph
+	reverse(){
+	
+		let graphReversed = new Graph(this.graphType);
+		
+		for (let [vertex] of this.vertices){
+			this.vertices.get(vertex).forEach(neighbor => {
+				graphReversed.addEdge(neighbor, vertex);
+			});
+		}		
+			
+		return graphReversed;
+		
+	};
+	
 	//check if graph holds a certain value
 	contains(value){ };
 	
 	//check if graph holds a certain edge
 	hasEdge(edge){ };
 	
-	
 	//Prints all vertices and their adjacency lists
 	printGraph() {
+		console.log(this.graphType + " GRAPH: ");
 		//extract key/vals and display them
 		for (let [vertex, neighbors] of this.vertices){
 			console.log(vertex, neighbors);
@@ -150,8 +202,19 @@ class Graph {
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //Driver
 
-const graph = new Graph();
-const vertices = [ 'A', 'B', 'C', 'D', 'E', 'F' ];
+/** 	9 edges, 8 nodes
+	*
+	*           A
+	*        /  | \
+	*      D -> E  B
+	*           |   \
+	*           F <- C
+	*           |     
+	*           G 	
+	*           |
+	*           H
+*/
+const graph = new Graph("DIRECTED");
 
 //initialize graph by adding edges
 graph.addEdge('A', 'B');
@@ -163,26 +226,32 @@ graph.addEdge('E', 'F');
 graph.addEdge('C', 'F');
 graph.addEdge('F', 'G');
 graph.addEdge('G', 'H');
-graph.addEdge('Y', 'Z');  //these verts are seperated from the rest, unreachable...
+//graph.addEdge('Y', 'Z');  //these verts are seperated from the rest, unreachable...
 
 graph.printGraph();
 
-/* console.log("BFS...");
+console.log("BFS...");
 graph.bfs('A');
 
 console.log("DFS...");
 graph.dfs('A', {});
 
 console.log("DFS Stack...");
-graph.dfsStack('A'); */
+graph.dfsStack('A'); 
 
-/* console.log("Removing vertex...");
+console.log("topologicalSort...");
+console.log(graph.topologicalSort());
+
+console.log("Reversing graph...");
+graph.reverse().printGraph();
+
+console.log("Removing vertex...");
 graph.removeVertex('F');
 graph.printGraph();
 
 console.log("Removing edge...");
 graph.removeEdge('B', 'C');
-graph.printGraph(); */
+graph.printGraph();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

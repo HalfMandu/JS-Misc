@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "jest test --watch",
-    "start": "node DataStructures/GraphNode"
+    "start": "node DataStructures/Graph"
   },
   "author": "SR",
   "license": "ISC",

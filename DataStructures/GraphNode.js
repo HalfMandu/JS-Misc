@@ -22,9 +22,9 @@ import { Stack } from "./Stack.js";
 class Graph {
 	
 	//Each Graph instance keeps track of its vertices and direction type (defaults to undirected)
-	constructor(edgeDir = "UNDIRECTED") {
+	constructor(graphType = "UNDIRECTED") {
 		this.vertices = new Map();   //int keys are the unique graph vertices, mapped to Vertex objects
-		this.edgeDir = edgeDir;      //DIRECTED, UNDIRECTED
+		this.graphType = graphType;      //DIRECTED, UNDIRECTED
 	}  
 	
 	//Add to map new edge: (int vert1 -> int vert2) and returns an array of two Vertex objs [v1, v2]
@@ -38,7 +38,7 @@ class Graph {
 		v1.addNeighbor(v2);
 
 		//only add a ref of v1 to v2 if graph is undirected
-		this.edgeDir === "UNDIRECTED" ? v2.addNeighbor(v1) : null;
+		this.graphType === "UNDIRECTED" ? v2.addNeighbor(v1) : null;
 
 		//return the freshly added edge
 		return [v1, v2];
@@ -66,7 +66,7 @@ class Graph {
 		//if they exist and are adjacent, remove their mutual refs
 		if (v1 && v2 && v1.isNeighbor(v2)) {
 			v1.removeNeighbor(v2);  //remove one neighbor (v2) from v1's list
-			this.edgeDir === "UNDIRECTED" ? v2.removeNeighbor(v1) : null;
+			this.graphType === "UNDIRECTED" ? v2.removeNeighbor(v1) : null;
 		}
 
 		return [v1, v2];
@@ -81,8 +81,8 @@ class Graph {
 			let targetVert = this.vertices.get(vertexKey);
 			
 			//only remove neighbor if they are neighbors to begin with...only works in undirected case
-			if (this.edgeDir === "UNDIRECTED"){
-				for (let neighbor of targetVert.getNeighbors()) {
+			if (this.graphType === "UNDIRECTED"){
+				for (let neighbor of targetVert.neighbors) {
 					neighbor.removeNeighbor(targetVert); 
 				} 			
 			}
@@ -113,14 +113,14 @@ class Graph {
 			//if the vertex exists and the map hasn't seen it yet, explore it and queue up its neighbors
 			if (nextVertex && !explored.has(nextVertex)) {
 				explored.set(nextVertex);    //mark as visited
-				nextVertex.getNeighbors().forEach(neighbor => toExplore.enqueue(neighbor));
+				nextVertex.neighbors.forEach(neighbor => toExplore.enqueue(neighbor));
 				console.log(nextVertex.value);
 			}
 		}
 	}
 	
 	//Depth first search, similar to bfs except using Stack to explore
-	dfs(firstVert) {
+	dfsStack(firstVert) {
 			
 		const explored = new Map();	   //keeps track of which vertices have been visited
 		const toExplore = new Stack(); //governs (LIFO) order of exploration for the remaining vertices
@@ -131,7 +131,7 @@ class Graph {
 			const nextVertex = toExplore.pop();
 			if (nextVertex && !explored.has(nextVertex)) {
 				explored.set(nextVertex);
-				nextVertex.getNeighbors().forEach(neighbor => toExplore.push(neighbor));
+				nextVertex.neighbors.forEach(neighbor => toExplore.push(neighbor));
 				console.log(nextVertex.value);
 			}
 		}
@@ -144,7 +144,7 @@ class Graph {
 		explored[start.value] = true;
 		console.log(start.value);
 		
-		for (let neighbor of this.vertices.get(start.value).getNeighbors()){
+		for (let neighbor of start.neighbors){
 			if (!explored[neighbor.value]){
 				explored[neighbor.value] = true;
 				this.dfsRecursive(neighbor, explored);
@@ -165,7 +165,7 @@ class Graph {
 			if (nextVertex && !explored.has(nextVertex)) {
 				yield nextVertex;
 				explored.set(nextVertex);   
-				nextVertex.getNeighbors().forEach(neighbor => toExplore.enqueue(neighbor));
+				nextVertex.neighbors.forEach(neighbor => toExplore.enqueue(neighbor));
 			}
 		}
 	}
@@ -183,7 +183,7 @@ class Graph {
 			if (nextVertex && !explored.has(nextVertex)) {
 				yield nextVertex;
 				explored.set(nextVertex);
-				nextVertex.getNeighbors().forEach(neighbor => toExplore.push(neighbor));
+				nextVertex.neighbors.forEach(neighbor => toExplore.push(neighbor));
 			}
 		}
 	}
@@ -195,18 +195,18 @@ class Graph {
 		explored[vertex] = true;
 	   	   
 		//check each neighbor -- if they aren't explored, recurse on them
-		for (let neighbor of this.vertices.get(vertex).getNeighbors()){
+		for (let neighbor of this.vertices.get(vertex).neighbors){
 			if (!explored[neighbor.value]) {
 				numVerts = this.topSortRecurser(neighbor.value, numVerts, explored, order);
 			}
 		} 
 		
-		//we can put the vertex in its rightful place now
+		//when there's no more outbound arcs, decrement size and put the vertex in its rightful place now
 		order[vertex] = numVerts;
 		return numVerts - 1;
 	}
 	
-	//Instead of using a Stack, this approach passes the information forward with parameters
+	//This approach passes the information forward with parameters
 	topologicalSort(){
 	
 		let explored = {};		//keeps track of which verts have been visited
@@ -230,7 +230,7 @@ class Graph {
 		explored[vertex] = true;
 	   	   
 		//check each neighbor -- if they aren't explored, recurse on them
-		for (let neighbor of this.vertices.get(vertex).getNeighbors()){
+		for (let neighbor of this.vertices.get(vertex).neighbors){
 			if (!explored[neighbor.value]) {
 				this.topSortStackRecurser(neighbor.value, explored, stack);
 			}
@@ -240,7 +240,7 @@ class Graph {
 		stack.push(vertex);
 	}
 
-	//Retun an ordering of the vertices such that for every directed edge (u, v), u comes before v
+	//Uses Stack to retun an ordering of the verts such that for every directed edge (u, v), u comes before v
 	topologicalSortStack() {
 	
 		let stack = new Stack();  //Stack to govern LIFO exploration
@@ -258,12 +258,12 @@ class Graph {
 		}
 	}
 	
-	//Return a sink vertex
+	//Return a sink vertex - a vertex without any outbound edges
 	getSink(){
 	
 		//returns the first sink it finds
 		for (let [vert] of this.vertices){
-			if (this.vertices.get(vert).getNeighbors().length < 1){
+			if (this.vertices.get(vert).neighbors.length < 1){
 				return this.vertices.get(vert);
 			}
 		}
@@ -288,7 +288,7 @@ class Graph {
 	//Display the current state of Graph
 	printGraph(){
 		
-		console.log(this.edgeDir + " GRAPH: ");
+		console.log(this.graphType + " GRAPH: ");
 		
 		for (let [vertex, neighbors] of this.vertices){
 			console.log(vertex, neighbors);
@@ -375,7 +375,7 @@ console.log("DFS with generator: ");
 console.log([...graph.dfsGen(firstVert)].map(vertex => vertex.value));	// [1, 4, 8, 3, 7, 6, 10, 2, 5, 9] 
 
 console.log("DFS stack: ");
-graph.dfs(firstVert);
+graph.dfsStack(firstVert);
 
 console.log("DFS recursive: ");
 graph.dfsRecursive(firstVert, {}); 
