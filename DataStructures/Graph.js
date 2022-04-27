@@ -5,8 +5,8 @@
 *	This Graph implementation uses a map to associate int keys with vertice arrays
 */
 
-import { Queue } from "./Queue.js";
-import { Stack } from "./Stack.js";
+const Queue = require('./Queue');
+const Stack = require('./Stack');
 
 class Graph {
 	
@@ -166,11 +166,11 @@ class Graph {
 				
 		return order;
 	}
-	
+
 	//Reverse all of the arcs -- transpose graph
 	reverse(){
 	
-		let graphReversed = new Graph(this.graphType);
+		const graphReversed = new Graph(this.graphType);
 		
 		for (let [vertex] of this.vertices){
 			this.vertices.get(vertex).forEach(neighbor => {
@@ -214,10 +214,10 @@ class Graph {
 	*           |
 	*           H
 */
-const graph = new Graph("DIRECTED");
+//const graph = new Graph("DIRECTED");
 
 //initialize graph by adding edges
-graph.addEdge('A', 'B');
+/* graph.addEdge('A', 'B');
 graph.addEdge('A', 'D');
 graph.addEdge('A', 'E');
 graph.addEdge('B', 'C');
@@ -225,12 +225,12 @@ graph.addEdge('D', 'E');
 graph.addEdge('E', 'F');
 graph.addEdge('C', 'F');
 graph.addEdge('F', 'G');
-graph.addEdge('G', 'H');
-//graph.addEdge('Y', 'Z');  //these verts are seperated from the rest, unreachable...
+graph.addEdge('G', 'H'); 
+//graph.addEdge('Y', 'Z');  //just dummy verts, seperated from the rest/unreachable...
 
-graph.printGraph();
+graph.printGraph(); */
 
-console.log("BFS...");
+/* console.log("BFS...");
 graph.bfs('A');
 
 console.log("DFS...");
@@ -242,21 +242,23 @@ graph.dfsStack('A');
 console.log("topologicalSort...");
 console.log(graph.topologicalSort());
 
-console.log("Reversing graph...");
-graph.reverse().printGraph();
-
 console.log("Removing vertex...");
 graph.removeVertex('F');
 graph.printGraph();
 
 console.log("Removing edge...");
 graph.removeEdge('B', 'C');
-graph.printGraph();
+graph.printGraph();  
+*/
 
+/* console.log("Reversing graph...");
+let graphReversed = graph.reverse();
+graphReversed.printGraph();
+ */
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-export { Graph };
-
+//export { Graph };
+module.exports = { Graph };
 
 
 

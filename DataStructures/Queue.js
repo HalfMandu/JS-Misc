@@ -22,4 +22,6 @@ class Queue extends Array {
 
 }
 
-export { Queue };
+//export { Queue };
+module.exports = { Queue };
+

@@ -2,7 +2,7 @@
   "name": "algos",
   "version": "1.0.0",
   "description": "Karatsuba integer multiplication",
-  "main": "karatsuba.js",
+  "main": "Misc/karatsuba.js",
   "type": "module",
   "scripts": {
     "test": "jest test --watch",
