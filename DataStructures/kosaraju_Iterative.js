@@ -151,7 +151,7 @@ const getGraphFromFile = async (sccFile) => {
 console.log("Starting iterative Kosaraju...");
 
 //Fetch file
-getGraphFromFile('./SCC_small.txt').then((graph) => {
+getGraphFromFile('./data/SCC_small.txt').then((graph) => {
 
 	const kosaraju = new Kosaraju_Iterative(graph);
 	
