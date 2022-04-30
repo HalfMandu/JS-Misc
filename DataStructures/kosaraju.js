@@ -2,6 +2,9 @@
 * 	Kosaraju's Two-Pass Algorithm  - JS Implementation - O(m + n)
 *   Stephen Rinkus
 *
+*		Recursive implementation of Kosaraju
+*		Works better for smaller file sizes -- large input creates a big recursion frame stack
+*
 *		node --stack-size=32000 '.\kosaraju.js'
 */
 
@@ -11,10 +14,11 @@ const { Graph } = require('./Graph.js');
 //Main
 
 let fTime = 0;			//finishing times in 1st pass...also counts how many nodes processed so far
-let finishTimes = {};	//object to map verts to their finishing times
-let explored = {};  	//object to map verts to their visited status
+const finishTimes = {};	//maps verts to their finishing times
+let explored = {};  	//maps verts to their visited status
 let source = null;		//tracks most recent vertex from which dfs started
-let leaders = {};		//maps leaders to their appearance count
+const leaders = {};		//maps leader verts to an array of the verts in their SCC
+const sccSizes = {};	//maps leader verts to their SCC size
 
 //Outer loop to run dfs on all the points and collect finishing times
 const dfsFinishingTimes = (graph) => {
@@ -26,10 +30,12 @@ const dfsFinishingTimes = (graph) => {
 		}
 	}
 	
+	console.log("finishTimes");
+	console.log(finishTimes);
 };
 
 //Dig down on a vertex
-const dfsFirst = (graph, vert) => {
+const dfsFirst = async (graph, vert) => {
 
 	explored[vert] = true;
 	
@@ -60,27 +66,32 @@ const dfsSccLeaders = (graph) => {
 		//check all outbound edges from vert
 		for (let neighbor of graph.vertices.get(vert.toString())) {  
 			if (!explored[neighbor]){
-				dfsSecond(graph, neighbor);
+				dfsSecond(graph, neighbor, source);
 			}
 		}
 	}
 };
 
 //2nd dfs pass helper			
-const dfsSecond = (graph, vert) => {
+const dfsSecond = async (graph, vert, source) => {
 
 	explored[vert] = true;
-
+	
 	//check all outbound edges from vert
 	for (let neighbor of graph.vertices.get(vert)) {  
 		if (!explored[neighbor]){
-			dfsSecond(graph, neighbor);
+			dfsSecond(graph, neighbor, source);
 		}
 	}
 	
 	//once all of this vert's neighbors have been visited, make note of the source DFS point which started it
-	leaders[vert] = source;
-
+	//also counting scc sizes on the way by
+	if (!leaders[source]){
+		leaders[source] = [];
+		sccSizes[source] = 1;
+	}	
+	leaders[source].push(vert);
+	sccSizes[source]++;
 };
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -111,26 +122,7 @@ const getGraphFromFile = async (sccFile) => {
 	return graph;
 };
 
-//Count the leaders and their group sizes
-const countSccs = (leaders) => {
-
-	const finalSccs = {};
-	
-	for (let [vert, leader] of Object.entries(leaders)){
-				
-		if (!finalSccs[leader]){
-			finalSccs[leader] = 2;
-		} else {
-			finalSccs[leader]++;
-		}
-		
-	}
-		
-	console.log("TOP 5 SCC SIZES: " + Object.values(finalSccs).sort().slice(0, 5));	
-	
-};
-
-//Return a Graph based on the finishing times of the first DFS call 
+//Reset the Graph labels based on the finishing times of the first DFS call 
 const replaceLabels = (graph) => {
 	
 	const leaderGraph = new Graph("DIRECTED");
@@ -142,10 +134,31 @@ const replaceLabels = (graph) => {
 		}
 	}
 	
-	return leaderGraph;
+	graph.vertices = leaderGraph.vertices;
 	
 }; 
 
+//Convert object key/val pairs to array so they can be sorted
+const sortLeaders = () => {
+
+	const leadersSorted = [];
+	for (let leader in sccSizes) {
+		leadersSorted.push([leader, sccSizes[leader]]);
+	}
+
+	leadersSorted.sort((leader1, leader2) => leader1[1] - leader2[1] );
+	
+	console.log("leadersSorted: ");
+	console.log(leadersSorted);
+	
+	let topSccSizes = [];
+	for (let [leader, sccSize] of Object.values(leadersSorted)) {
+		topSccSizes.push(sccSize);
+	}
+	
+	console.log("top Scc Sizes: " + topSccSizes.sort().slice(0,5));
+	
+}
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Driver
 
@@ -171,26 +184,26 @@ const replaceLabels = (graph) => {
 console.log("Starting Kosaraju...");
 
 //Fetch file
-getGraphFromFile('./DataStructures/data/SCC_small.txt').then((graph) => {
+getGraphFromFile('./SCC_small.txt').then((graph) => {
 
-	console.log("REVERSING GRAPH... ");
-	graph = graph.reverse();
+	console.log("Reversing graph... ");
+	graph.reverse();
 	
-	console.log("DFS FIRST PASS... ");
+	console.log("DFS first pass, collecting finishing times... ");
 	dfsFinishingTimes(graph);
 	
-	console.log("REVERSING GRAPH BACK... ");
-	graph = graph.reverse();
-
-	console.log("REPLACING LABELS... ");
+	console.log("Re-reversing graph... ");
+	graph.reverse();
 	
-	graph = replaceLabels(graph);
+	console.log("Replacing verts with their finishing times... ");
+	replaceLabels(graph);
 		
-	console.log("DFS SECOND PASS... ");
+	console.log("DFS second pass, assigning leaders to sccs... ");
 	dfsSccLeaders(graph);
-
-	countSccs(leaders);
 	
+	console.log("Getting top leaders... ");
+	sortLeaders();
+
 });
 
 
