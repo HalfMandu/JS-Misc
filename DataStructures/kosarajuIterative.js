@@ -2,14 +2,11 @@
 	Kosaraju's Two-Pass Algorithm  - JS Iterative Implementation - O(m + n)
 	Stephen Rinkus
 		
-		This is a two-run DFS algorithm which reveals the strongly connected components of a directed graph.
-		The first DFS takes reversed graph, processes nodes downward from n and notes the finishing times.
-		The second DFS reverses back the graph, replaces nodes with their finishing times, and tracks source vertices which dfs uses to discover SCC's.
-		
-		Iterative version 
-		
-		node --stack-size=32000 '.\kosaraju.js'
+		Iterative approach - this approach makes it more feasible to intake a large file.
+		Uses Stack to carry out the exploration.
 */
+
+const { performance } = require('perf_hooks');
 
 const { Graph } = require('./Graph.js');
 const { Stack } = require('./Stack');
@@ -17,16 +14,15 @@ const { Stack } = require('./Stack');
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Main
 
-class Kosaraju_Iterative {
+class KosarajuIterative {
 
 	constructor(graph) {
-		this.scc_list = [];
 		this.finishTimes = [];
 		this.graph = graph;
 	};
 	
 	//First DFS wrapper
-	dfsFinishingTimes = () => {
+	getFinishTimes = () => {
 	
 		let explored = {}; 
 		let finished = {};
@@ -34,27 +30,26 @@ class Kosaraju_Iterative {
 		//try each point seperately, work downwards from nth element...
 		for (let vert of [...this.graph.vertices.keys()].sort().reverse()){
 			if (!explored[vert]){
-				this.dfsFirst(vert, explored, finished);	
+				this.dfsFinishTimes(vert, explored, finished);	
 			}
 		}
 	
-		console.log("FIRST DFS DONE");
-		console.log("finishTimes: " + JSON.stringify(this.finishTimes));
+		console.log("First DFS done");
+		//console.log("finishTimes: " + this.finishTimes);
 	};
 	
-	//First iterative dig
-	dfsFirst = (vert, explored, finished) => {
+	//First iterative dig - collecting finishing times from a leader starting point 
+	dfsFinishTimes = (vert, explored, finished) => {
 	
 		const stack = new Stack();
 		stack.push(vert);
 		
 		//take a vert, explore it, then add its neighbors to the stack
-		while (!stack.isEmpty()) {
+ 		while (!stack.isEmpty()) {
 			let vert = stack.pop();
 			if (!explored[vert]){
 				explored[vert] = true;
 				stack.push(vert);
-				//console.log("dfsFirst exploring " + vert);
 				for (let neighbor of this.graph.vertices.get(vert)){
 					stack.push(neighbor);
 				}
@@ -68,56 +63,52 @@ class Kosaraju_Iterative {
 		} 
 	};
 	
-	//Second DFS
-	dfsSccLeaders = () => {
+	//Second DFS - peel off SCC's and note their sizes
+	getSccLeaders = () => {
 		
-		let explored = {};   //reset explored map
-		let finished = {};
-		let leaders = {};
-		let source = null;
-		let sccSizes = {};
+		let explored = {};   //boolean explored status of a given vert
+		let sccs = [];  	 //2D array, a list of SCC's
+		let sccSizes = [];	 //a list of known scc sizes
 		
 		//proccess nodes based on decreasing finishing times
 		for (let vert of this.finishTimes.reverse()){
 			if (!explored[vert]){
-				
-				//console.log("second DFS vert: " + vert);
-				const stack = new Stack();
-				stack.push(vert);
-				source = vert;
-				
-				while (!stack.isEmpty()) {
-					let nextVert = stack.pop();
-					if (!explored[nextVert]){
-						//console.log("exploring " + nextVert, source);
-						explored[nextVert] = true;
-						stack.push(nextVert);
-						for (let neighbor of this.graph.vertices.get(nextVert)){
-							stack.push(neighbor);
-						}
-
-					}
-					//if already been explored and neighbors seen, make sure it's marked as finished
-					else {
-						if (!finished[nextVert]) {
-							finished[nextVert] = true;
-							//if this source doesn't have an entry yet, intialize it
-							if (!leaders[source]){
-								leaders[source] = [];
-								sccSizes[source] = 0;  	//count the verts added to a leader
-							} 
-							leaders[source].push(nextVert); 
-							sccSizes[source]++;
-						}	
-					} 
-				}
+				let scc = [];  	//all verts seen onward here should be added as members to the leader's scc
+				this.peelOffScc(vert, explored, scc);   //from here, visit all possible verts
+				sccs.push(scc);							
+				sccSizes.push(scc.length);
 			}
 		}
 		
-		console.log("leaders: " + JSON.stringify(leaders));
-		console.log("top sccSizes: " + Object.values(sccSizes).sort().slice(-5));
+		//all scc's collected - get the biggest 5
+		console.log("Top 5 SCC sizes: ");
+		console.log(sccSizes.sort((a, b) => a - b).slice(-5));
 	};
 
+	//Recursive DFS helper to remove SCC's one at a time from reversed graph
+	peelOffScc = (vert, explored, scc) => {
+		
+		//finding another member of this scc
+		scc.push(vert);
+		explored[vert] = true;
+		
+		const stack = new Stack();
+		stack.push(vert);
+		
+		//DFS - take a vert, explore it, then add its neighbors to the stack
+		while (!stack.isEmpty()) {
+			let vert = stack.pop();
+				for (let neighbor of this.graph.vertices.get(vert)){
+					if (!explored[neighbor]){
+						explored[neighbor] = true;
+						scc.push(neighbor);
+						stack.push(neighbor);
+					}
+				}
+		}
+		
+	}
+	
 }
 
 //Take input edge list txt file and return a directed Graph
@@ -148,23 +139,30 @@ const getGraphFromFile = async (sccFile) => {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Driver
 
-console.log("Starting iterative Kosaraju...");
+console.log("Starting Kosaraju (iterative)...");
 
 //Fetch file
 getGraphFromFile('./data/SCC_small.txt').then((graph) => {
 
-	const kosaraju = new Kosaraju_Iterative(graph);
+	let startTime = performance.now();
+	
+	const kosaraju = new KosarajuIterative(graph);
 	
 	console.log("Reversing graph... ");
 	kosaraju.graph.reverse();
 		
 	console.log("DFS first pass... ");
-	kosaraju.dfsFinishingTimes();
+	kosaraju.getFinishTimes();
 	
 	console.log("Re-reversing graph... ");
 	kosaraju.graph.reverse();
 			
 	console.log("DFS second pass... ");
-	kosaraju.dfsSccLeaders();
+	kosaraju.getSccLeaders();
+	
+	let endTime = performance.now();
+	let runDuration = (endTime/1000) - (startTime/1000);
+	
+	console.log("Kosaraju took " + runDuration.toFixed(2) + " seconds");  // ~9 seconds
 
 });
