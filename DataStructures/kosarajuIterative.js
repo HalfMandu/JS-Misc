@@ -7,7 +7,6 @@
 */
 
 const { performance } = require('perf_hooks');
-
 const { Graph } = require('./Graph.js');
 const { Stack } = require('./Stack');
 
@@ -38,7 +37,7 @@ class KosarajuIterative {
 		//console.log("finishTimes: " + this.finishTimes);
 	};
 	
-	//First iterative dig - collecting finishing times from a leader starting point 
+	//First iterative dig - collecting finishing times 
 	dfsFinishTimes = (vert, explored, finished) => {
 	
 		const stack = new Stack();
