@@ -18,11 +18,9 @@ class MinHeap {
 		this.heap = [];			
 	}
 	
-	//Insert an array of ints one at a time into a Heap
+	//Insert an array of ints one at a time into Heap
 	buildMinHeap(){
-		let values = [12, 7, 1, 3, 9, 13, 8, 11, 6, 14, 5, 10, 2, 4]   // 1,3,2,6,5,7,4,12,11,14,9,13,10,8
-		//let values = [3, 1, 6, 5, 2, 4]   						   		 // 1,2,4,5,3,6
-		//let values = [3, 6, 5, 2, 7, 4]   						   		 //
+		let values = [3, 1, 6, 5, 2, 4]   				    // 1,2,4,5,3,6
 		values.forEach(val => this.insert(Number(val)));
 	}
 	
@@ -31,15 +29,15 @@ class MinHeap {
 		[this.heap[node1], this.heap[node2]] = [this.heap[node2], this.heap[node1]];
 	}
 	
-	//Create a new node at the end of the heap, then start moving it upwards
+	//Add a new value to the heap then restore heap property
 	insert(val){
-		//if parent is less than child, swap parent/child..repeat until heap property is regained.	
+	
+		//create a new node at the end of the heap, then start moving it upwards	
 		this.heap.push(val);
 		this.bubbleUp();
 	}
 	
-	//Let a node work its way upwards to its natural resting spot.
-	//Starts at bottom by default, optionally takes a starting node location
+	//Work a node upwards to a valid spot...starts at bottom by default, optionally takes a starting location
 	bubbleUp(node){
 		
 		let index;    
@@ -57,7 +55,7 @@ class MinHeap {
 		} 
 	}
 	
-	//Sink down a node, defaults to starting at root
+	//Sink a node down, defaults to starting at root
 	bubbleDown(startNode = 0){
 	
 		let index = startNode;				//access to move through the array
@@ -73,20 +71,16 @@ class MinHeap {
 			leftChildIndex = (2 * index) + 1;
 			rightChildIndex = (2 * index) + 2;
 			
-			//first check if child inbounds, if so check if swap is needed on left
-			if (leftChildIndex < length) {
-				if (this.heap[leftChildIndex] < this.heap[index]){
-					this.swap(currNodeIndex, leftChildIndex);
-					swap = true;
-				}
+			//check if left child exists and if swap is needed
+			if (leftChildIndex < length && this.heap[leftChildIndex] < this.heap[index]) {
+				this.swap(currNodeIndex, leftChildIndex);
+				swap = true;
 			}
 			
 			//then check if a swap needed on the right, regardless if a swap already occured on the left
-			if (rightChildIndex < length) {
-				if ((this.heap[rightChildIndex] < this.heap[currNodeIndex])){
-					this.swap(currNodeIndex, rightChildIndex);
-					swap = true;
-				}
+			if (rightChildIndex < length && this.heap[rightChildIndex] < this.heap[currNodeIndex]) {
+				this.swap(currNodeIndex, rightChildIndex);
+				swap = true;
 			}
 			
 			//keep crawling down the tree
@@ -96,14 +90,43 @@ class MinHeap {
 	
 	};
 	
-	//Bubble up or down when a node has recieved a new value 
+	//Bubble up or down for a node takin in a new value 
 	bubble(delVal, newVal, index){
 
 		//push the new node up or down the tree, depending on how it compares to the deleted node
 		delVal < newVal ? this.bubbleDown(index) : this.bubbleUp(index);
 	}
 	
-	//The min is the first element in the array
+	//Recursive search - find the index of a value...takes a start location as arg also (assuming no dupes)
+	search(val, index = 0, isFound = false){
+		
+		let leftChildIndex = (2 * index) + 1;
+		let rightChildIndex = (2 * index) + 2;
+		const length = this.heap.length;
+		
+		//base case - value found
+		if (this.heap[index] == val){
+			//console.log("Found target val " + val + " at index " + index);
+			isFound = true;
+			return index;
+		}
+		
+		//if target not yet found, and left child exists and is less than or equal to target, recurse on it 
+		if (!isFound && leftChildIndex < length && this.heap[leftChildIndex] <= val){
+			return this.search(val, leftChildIndex);
+		}
+		
+		//if target not yet found, and right child exists and is less than or equal to target, recurse on it 
+		if (!isFound && rightChildIndex < length && this.heap[rightChildIndex] <= val){
+			return this.search(val, rightChildIndex);
+		}
+		
+		//if code made it this far, then target is not present in the heap
+		return null;
+		
+	}
+	
+	//Return the minimum value within the heap...the min is the first element in the array
 	getMin(){
 		if (!this.isEmpty()) {
 			return this.heap[0];
@@ -183,39 +206,6 @@ class MinHeap {
 		
 	}
 	
-	//Recursive - find the index of a given value...takes a start location as arg also (assuming no dupes)
-	search(val, index = 0, isFound = false){
-		
-		let leftChildIndex = (2 * index) + 1;
-		let rightChildIndex = (2 * index) + 2;
-		const length = this.heap.length;
-		let res = null;
-		
-		//base case - value found
-		if (this.heap[index] == val){
-			//console.log("Found target val " + val + " at index " + index);
-			isFound = true;
-			return index;
-		}
-		
-		//if the left child exists and is less than or equal to search value, recurse on it 
-		if (leftChildIndex < length && !isFound){
-			if (this.heap[leftChildIndex] <= val){
-				res = this.search(val, leftChildIndex);
-			}
-		}
-		
-		//if the right child exists and is less than or equal to search value, recurse on it 
-		if (rightChildIndex < length && !isFound){
-			if (this.heap[rightChildIndex] <= val){
-				res = this.search(val, rightChildIndex);
-			}
-		}
-		
-		return res;
-		
-	}
-	
 	//Boolean check if the heap is empty
 	isEmpty(){
 		return this.heap.length < 1;
@@ -239,20 +229,22 @@ class MinHeap {
  *        /  \     / 
  *      (5) (3)  (6)       
  */ 
-console.log("Starting up MinHeap...");
+//console.log("Starting up MinHeap...");
 
-const minHeap = new MinHeap();
+/* const minHeap = new MinHeap();
 minHeap.buildMinHeap();
+console.log("Heap : " + minHeap.heap); */
 
-console.log("Heap : " + minHeap.heap);
-
-console.log("Min: " + minHeap.getMin());
+/* console.log("Min: " + minHeap.getMin());
 console.log("Max: " + minHeap.getMax()); 
-console.log("isEmpty: " + minHeap.isEmpty());
+console.log("isEmpty: " + minHeap.isEmpty()); */
 
-/* console.log("Searching...");
-let searchRes = minHeap.search(0, 10);
-console.log("searchRes: " + searchRes); */
+/* let searchVal = 15;
+console.log("Searching for " + searchVal + "...");
+let searchRes = minHeap.search(searchVal);
+console.log("searchRes1: " + searchRes);
+searchRes = minHeap.search(searchVal);
+console.log("searchRes2: " + searchRes); */
 
 /* console.log("Decreasing key...");
 minHeap.decreaseKey(4, 1);
@@ -262,20 +254,20 @@ console.log("Heap : " + minHeap.heap); */
 console.log(minHeap.extractMin());
 console.log("Heap : " + minHeap.heap);  */
 
-/* console.log("Extracting max: ");
+/* console.log("Extracting max...");
 console.log(minHeap.extractMax());
-console.log("Heap : " + minHeap.heap); */
+console.log("Heap : " + minHeap.heap);  */
 
 /* let key = 1;
 console.log("Deleting key: " + key + "...");
 console.log("Deleted: " + minHeap.deleteKey(key));
-console.log("Heap : " + minHeap.heap); */
+console.log("Heap : " + minHeap.heap); 
 
-/* let val = 11;
+let val = 4;
 console.log("Deleting value " + val + "...");
 let delRes = minHeap.deleteValue(val)
 console.log("delRes: " + delRes); 
-console.log("Heap : " + minHeap.heap); */
+console.log("Heap : " + minHeap.heap);  */
 
  
 //console.log("Final heap : " + minHeap.heap);
