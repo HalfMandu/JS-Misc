@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "description": "Karatsuba integer multiplication",
   "main": "Misc/karatsuba.js",
-  "type": "module",
   "scripts": {
     "test": "jest test --watch",
-    "start": "node DataStructures/Graph"
+    "start": "node DataStructures/kosaraju"
   },
   "author": "SR",
   "license": "ISC",
