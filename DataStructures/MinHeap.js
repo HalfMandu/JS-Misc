@@ -1,14 +1,15 @@
 /* 
-
 	Min Heap
 	Stephen Rinkus 
-	
 	
 			  (1)
 			/    \
 		 (2)     (4)
 		/  \     / 
 	  (5) (3)  (6)       
+	  
+	Insert - O(logn)
+	Extract-min - O(logn)
 */
 
 class MinHeap {
@@ -55,39 +56,37 @@ class MinHeap {
 		} 
 	}
 	
-	//Sink a node down, defaults to starting at root
-	bubbleDown(startNode = 0){
+	//Sink a node down...extractMin is followed by a bubbleDown, after last element is placed at top...
+	bubbleDown(index = 0){
 	
-		let index = startNode;				//access to move through the array
 		let swap = true;					//boolean swap status, so code knows when to exit loop
+		let leftChildIndex, rightChildIndex;
 		const length = this.heap.length;
-		let currNodeIndex, leftChildIndex, rightChildIndex;
 		
-		//keeping swapping until can't anymore (no more children or can't sink any further)
+		//while downward swaps are still possible
 		while (swap) {
-		
-			swap = false;					//reset swap...code will exit loop unless a swap is performed
-			currNodeIndex = index;			//make note of initial node location in case a swap occurs
+						
+			swap = false;		//code will need to swap in order to re-enter loop				
+						
+			let min = index;
 			leftChildIndex = (2 * index) + 1;
 			rightChildIndex = (2 * index) + 2;
 			
-			//check if left child exists and if swap is needed
 			if (leftChildIndex < length && this.heap[leftChildIndex] < this.heap[index]) {
-				this.swap(currNodeIndex, leftChildIndex);
-				swap = true;
+				min = leftChildIndex;
 			}
-			
-			//then check if a swap needed on the right, regardless if a swap already occured on the left
-			if (rightChildIndex < length && this.heap[rightChildIndex] < this.heap[currNodeIndex]) {
-				this.swap(currNodeIndex, rightChildIndex);
-				swap = true;
+
+			if (rightChildIndex < length && this.heap[rightChildIndex] < this.heap[min]){
+				min = rightChildIndex;	
 			}
-			
-			//keep crawling down the tree
-			index = leftChildIndex;		
-			
+						
+			//if new min was detected, do the needed swap
+			if (min != index) {
+				this.swap(index, min);	//swap heap spots
+				index = min;			//advnace downwards
+				swap = true;
+			} 
 		}
-	
 	};
 	
 	//Bubble up or down for a node takin in a new value 
@@ -231,9 +230,9 @@ class MinHeap {
  */ 
 //console.log("Starting up MinHeap...");
 
-/* const minHeap = new MinHeap();
+const minHeap = new MinHeap();
 minHeap.buildMinHeap();
-console.log("Heap : " + minHeap.heap); */
+console.log("Heap : " + minHeap.heap);
 
 /* console.log("Min: " + minHeap.getMin());
 console.log("Max: " + minHeap.getMax()); 
@@ -250,9 +249,9 @@ console.log("searchRes2: " + searchRes); */
 minHeap.decreaseKey(4, 1);
 console.log("Heap : " + minHeap.heap); */
 
-/* console.log("Extracting min: ");
+console.log("Extracting min: ");
 console.log(minHeap.extractMin());
-console.log("Heap : " + minHeap.heap);  */
+console.log("Heap : " + minHeap.heap); 
 
 /* console.log("Extracting max...");
 console.log(minHeap.extractMax());
