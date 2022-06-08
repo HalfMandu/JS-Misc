@@ -16,6 +16,14 @@
 	Insert			O(log n)	O(n)
 	Delete			O(log n)	O(n)
 	inOrder			O(n)		O(n)
+	
+	Graph 1    (5)			Graph 2      (8)   
+             /    \	                   /    \
+          (2)     (7)                (3)    (10)
+         /  \     /  \              /  \       \
+       (1) (3)  (6)  (8)       	 (1)  (6)     (14)		
+									  / \     /
+									(4) (7) (13)		
 */
 
 import { Queue } from "./Queue.js";
@@ -39,8 +47,7 @@ class BinarySearchTree {
 		this.root = null;
 	}
 	
-	//Put a new value in its rightful place in the tree
-	//A new key is inserted at the leaf. start searching a key from the root until hit a leaf node. Once a leaf node is found, the new node is added as a child. 
+	//A new node is inserted at the bottom level as a leaf. start searching a key from the root until hit a leaf node. Once a leaf node is found, the new node is added as a child. 
 	insert(value){
 	
         let newNode = new Node(value);
@@ -51,7 +58,7 @@ class BinarySearchTree {
             return;
         }
 		
-		//make a copy of the root to dig down from
+		//make a copy of the root to dig down with
         let currNode = this.root;
 		
 		//starting from root, start comparing to the new node
@@ -63,20 +70,19 @@ class BinarySearchTree {
 				return undefined;
 			}
 			
-			//if new node is less than this node in the tree, drill down to the left
+			//new value is greater than current spot, move to the left
             if (value < currNode.value){
-				//if reached the bottom of the tree, add the new node
                 if (!currNode.left){
-                    currNode.left = newNode;
+                    currNode.left = newNode;	//reached the bottom of the tree, add the new node
                     return;
                 }
                 currNode = currNode.left;
             } 
 			
-			//if new node is greater than this node in the tree, drill down to the right
+			//new value is greater than current spot, move to the right
 			else {
                 if (!currNode.right){
-                    currNode.right = newNode;
+                    currNode.right = newNode;   
                     return;
                 } 
                 currNode = currNode.right;
@@ -110,6 +116,103 @@ class BinarySearchTree {
 		
 		console.log("Target not found.");
 		return null;
+	}
+	
+	//Wrapper to oversee the removal and return of a node from the tree, needed to trap recursion
+	delete(value){
+		return this.findAndDelete(this.root, value);
+	}
+	
+	//Search for the node (recursively) and delete it...running time based on height of the tree
+	findAndDelete(currNode, value){
+		
+		//make sure node exists
+		if (!currNode){
+			return null;
+		}
+		
+		//if found the node, delete it, otherwise keep recursing
+		if (value === currNode.value) {
+			currNode = this.deleteNode(currNode);
+		} else if (value < currNode.value) {
+			currNode.left = this.findAndDelete(currNode.left, value);
+		} else {
+			currNode.right = this.findAndDelete(currNode.right, value);
+		}
+		
+		//return the updated root
+		return currNode;
+	}
+	
+	//Delete a given node from the tree
+	deleteNode(node){
+	
+		//easy case: no children -- delete node (set it to null)
+		if (!node.left && !node.right) {
+            return null;
+        }
+		
+		//hard case: 2 children -- start from node, compute node's predecessor (or successor), then swap the nodes, then delete new leaf node using easier approach (for 1 or 0 children)
+		else if (node.left && node.right) {
+
+			//delete predecessor's spot, and re-assign node the predecessor's value
+			const predecessor = this.getBottomRightLeaf(node.left);
+			this.findAndDelete(node, predecessor.value);	 
+			node.value = predecessor.value; 
+			
+            return node;
+        }
+		
+		//medium case: 1 child -- splice out node, replace with the child
+		else if (node.left) {
+            return node.left;
+        }
+
+		//otherwise just the right child exists, it can replace the removed node
+        return node.right;
+	}
+	
+	//Alternative search and delete approach...wrapper for deleteRec()
+	delete2(value){
+		return this.searchAndRemove(this.root, value);  //returning the deleted node
+	}
+		
+	//Alternate recursive search and delete, takes a starting point and a target search value
+	searchAndRemove(root, value){
+		
+		//console.log("currRoot, value: " + root.value, value);
+		
+		//base case -- the tree is empty
+		if (!root){
+			return root;
+		}
+		
+		//otherwise, recurse down the tree
+		if (value < root.value){
+			root.left = this.searchAndRemove(root.left, value);
+		} else if (value > root.value){
+			root.right = this.searchAndRemove(root.right, value);
+		}
+		
+		//this must be the target node, now it must be deleted
+		else {
+		
+			//node has one child or no child
+			if (!root.left){
+				return root.right;
+			} 
+			else if (!root.right){
+				return root.left;
+			}
+			
+			//node has two children, replace node with its inorder successor (smallest in the right subtree)
+			root.value = this.getSuccessor(root);
+  
+			//find and delete the inorder successor position, tracing the way back, reattach to right child
+			root.right = this.searchAndRemove(root.right, root.value);
+		}
+  
+		return root;
 	}
 	
 	//Keep drilling left until can't anymore, then start printing values
@@ -161,109 +264,6 @@ class BinarySearchTree {
 		currNode.left = currNode.right;
 		currNode.right = temp;
 	}
-	
-	//easy case: no children -- delete node.
-	//medium case: 1 child -- splice out node, replace with the child
-	//hard case: 2 children -- start from k, and compute k's predecessor or successor, then swap the nodes, then delete new leaf node using existing method (for 1 or 0 children)
-	//running time based on height of the tree
-	//Wrapper to oversee the recursive removal and return of a node from the tree
-	delete(value){
-		return this.findAndDelete(this.root, value);
-	}
-	
-	//Search for the node (recursively) and delete it
-	findAndDelete(currNode, value){
-		
-		//make sure node exists
-		if (!currNode){
-			return null;
-		}
-		
-		//if found the node, delete it, otherwise keep recursing
-		if (value === currNode.value) {
-			currNode = this.deleteNode(currNode);
-		} else if (value < currNode.value) {
-			currNode.left = this.findAndDelete(currNode.left, value);
-		} else {
-			currNode.right = this.findAndDelete(currNode.right, value);
-		}
-		
-		//return the updated root
-		return currNode;
-	}
-	
-	//Delete a given node from the tree
-	deleteNode(node){
-	
-		//if no children, just need to set its position to null value
-		if (!node.left && !node.right) {
-            return null;
-        }
-		
-		//if both children exist, recurse and swap the node with its predecessor
-		else if (node.left && node.right) {
-
-			const predecessor = this.getBottomRightLeaf(node.left);
-			
-			//the predecessor's spot can be deleted, then re-assign node to predecessor's value
-			node = this.findAndDelete(node, predecessor.value);	 
-            node.value = predecessor.value; 
-			
-            return node;
-        } 
-		
-		//if just a left child exists, it will replace the removed node
-		else if (node.left) {
-            return node.left;
-        }
-
-		//otherwise if just the right child exists, it will replace the removed node
-        return node.right;
-	}
-	
-	//Alternative search and delete approach...wrapper for deleteRec()
-	delete2(value){
-		return this.searchAndRemove(this.root, value);  //returning the deleted node
-	}
-		
-	//Alternate recursive search and delete, takes a starting point and a target search value
-	searchAndRemove(root, value){
-		
-		//console.log("currRoot, value: " + root.value, value);
-		
-		//base case -- the tree is empty
-		if (!root){
-			return root;
-		}
-		
-		//otherwise, recurse down the tree
-		if (value < root.value){
-			root.left = this.searchAndRemove(root.left, value);
-		} else if (value > root.value){
-			root.right = this.searchAndRemove(root.right, value);
-		}
-		
-		//this must be the target node, now it must be deleted
-		else {
-		
-			//node has one child or no child
-			if (!root.left){
-				return root.right;
-			} 
-			else if (!root.right){
-				return root.left;
-			}
-			
-			//node has two children, replace node with its inorder successor (smallest in the right subtree)
-			root.value = this.getSuccessor(root);
-  
-			//find and delete the inorder successor position, tracing the way back, reattach to right child
-			root.right = this.searchAndRemove(root.right, root.value);
-		}
-  
-		return root;
-	}
-
 	
 	//BFS - breadth first search - start from the top (root) and print horizontal levels going downward
 	bfs(){
@@ -428,12 +428,12 @@ class BinarySearchTree {
 	
 	//given an order statistic i, return ith smallest key in the tree.
 	select(i){
-	
+		
 	}
 	
 	//given a key value, return number of keys in the tree <= that value
 	rank(){
-	
+		
 	}
 	
 }
@@ -470,9 +470,9 @@ bst.insert(7);
 bst.insert(13);
 
 console.log("Getting min/max: ");
-console.log("min: " + bst.getMin());  //
-console.log("max: " + bst.getMax());  //
-console.log("minValue: " + bst.minValue());  //
+console.log("min: " + bst.getMin());  
+console.log("max: " + bst.getMax());  
+console.log("minValue: " + bst.minValue());  
 
 console.log("Getting Predecessor: ");
 console.log(bst.getPredecessor());  
@@ -485,26 +485,19 @@ bst.inOrder(bst.root);		//1, 2, 3, 5, 6, 7, 8
 
 //Removing node
 console.log("Traversing pre-order...");  
-bst.preOrder(bst.root);		//
-
+bst.preOrder(bst.root);		
 let delNode = 6;
 console.log("Removing node " + delNode);  
-
-console.log("delete, new Root: " + bst.delete(delNode).value);  
-//console.log("delete2 Root: " + bst.delete2(delNode).value);  
-
-/* console.log("inOrder Tree after removal: ");  //8, 7, 6, 5, 3, 2, 1
-bst.inOrder(bst.root);  */
-
+bst.delete(delNode);  
 console.log("Traversing pre-order...");  
-bst.preOrder(bst.root);		//
+bst.preOrder(bst.root);		
 
-/* //Searching
-let target = 5;
+//Searching
+/* let target = 14;
 console.log("Searching for target: " + target);
-console.log(bst.search(target));  //returns found node
+console.log(bst.search(target));  //returns found node */
 
-//Getting bottom right leaf
+/* //Getting bottom right leaf
 console.log("Successor right leaf: ");  
 console.log(bst.getBottomRightLeaf(bst.root));  //8
 
