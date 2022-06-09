@@ -1,5 +1,5 @@
 /* 
-	Binary Search Tree
+	Binary Search Tree - augmented for select/rank
 	Stephen Rinkus
 	
 	Each key has a value greater than all the values in its left subtree and less than all values in its right subtree. 
@@ -36,6 +36,7 @@ class Node{
 		this.value = value;	//int value
 		this.left = null;	//Node object
 		this.right = null;  //Node object
+		this.size = 1;  	//number of nodes in subtree
 	}
 }
 
@@ -47,7 +48,7 @@ class BinarySearchTree {
 		this.root = null;
 	}
 	
-	//A new node is inserted at the bottom level as a leaf. start searching a key from the root until hit a leaf node. Once a leaf node is found, the new node is added as a child. 
+	//A new node is inserted at the bottom level as a leaf. start searching a key from the root until hit a leaf node. Once a leaf node is found, the new node is added as a child 
 	insert(value){
 	
         let newNode = new Node(value);
@@ -73,18 +74,23 @@ class BinarySearchTree {
 			//new value is greater than current spot, move to the left
             if (value < currNode.value){
                 if (!currNode.left){
+                    currNode.size++;
                     currNode.left = newNode;	//reached the bottom of the tree, add the new node
-                    return;
+					return;
                 }
+				currNode.size++;
+				//currNode.size =+ currNode.left.size + currNode.right.size;
                 currNode = currNode.left;
             } 
 			
 			//new value is greater than current spot, move to the right
 			else {
                 if (!currNode.right){
+                    currNode.size++;
                     currNode.right = newNode;   
                     return;
                 } 
+				currNode.size++;
                 currNode = currNode.right;
             }
         }
@@ -118,7 +124,7 @@ class BinarySearchTree {
 		return null;
 	}
 	
-	//Wrapper to oversee the removal and return of a node from the tree, needed to trap recursion
+	//Wrapper to trap recursion for the removal and return of a node from the tree
 	delete(value){
 		return this.findAndDelete(this.root, value);
 	}
@@ -136,6 +142,7 @@ class BinarySearchTree {
 			currNode = this.deleteNode(currNode);  //needs to go find which node to replace currNode with
 		} else if (value < currNode.value) {
 			currNode.left = this.findAndDelete(currNode.left, value);
+			//currNode.size--;
 		} else {
 			currNode.right = this.findAndDelete(currNode.right, value);
 		}
@@ -427,6 +434,17 @@ class BinarySearchTree {
 	}
 	
 	//given an order statistic i, return ith smallest key in the tree.
+	/* given an order statistic i, return ith smallest key in the tree.
+			-start at root, check size of left subtree
+				-if larger than requested ith order statistic, then the target MUST be in the right subtree
+					-because the smallest values by definition to the left of the root
+				-if smaller, target must exist within a left subtree at node whose size is > i
+			-subtract the subtree size + 1 (self) from i to identify how far to other side to go
+			-let a = size of subtree
+				-if a = i - 1, return x's key
+				-if a >= i, recursivley compute ith order statistic at y  //left subtree is larger
+				-if a < i - 1, recurse on right subtree   		//left subtree too small
+					-recursivley compute (i-a-1)th order stat on right subtree */
 	select(i){
 		
 	}
@@ -474,7 +492,10 @@ console.log("min: " + bst.getMin());
 console.log("max: " + bst.getMax());  
 console.log("minValue: " + bst.minValue());  
 
-console.log("Getting Predecessor: ");
+console.log("size: ");  
+console.log(bst.search(8).size);
+
+/* console.log("Getting Predecessor: ");
 console.log(bst.getPredecessor());  
 
 console.log("Getting Successor: ");
@@ -491,7 +512,7 @@ console.log("Removing node " + delNode);
 bst.delete(delNode);  
 console.log("Traversing pre-order...");  
 bst.preOrder(bst.root);		
-
+ */
 //Searching
 /* let target = 14;
 console.log("Searching for target: " + target);
