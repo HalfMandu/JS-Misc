@@ -74,7 +74,7 @@ class BinarySearchTree {
 			//new value is greater than current spot, move to the left
             if (value < currNode.value){
                 if (!currNode.left){
-                    currNode.size++;
+                    currNode.size++;			//one more node in the subtree
                     currNode.left = newNode;	//reached the bottom of the tree, add the new node
 					return;
                 }
@@ -434,18 +434,32 @@ class BinarySearchTree {
 	}
 	
 	//given an order statistic i, return ith smallest key in the tree.
-	/* given an order statistic i, return ith smallest key in the tree.
-			-start at root, check size of left subtree
-				-if larger than requested ith order statistic, then the target MUST be in the right subtree
-					-because the smallest values by definition to the left of the root
-				-if smaller, target must exist within a left subtree at node whose size is > i
-			-subtract the subtree size + 1 (self) from i to identify how far to other side to go
-			-let a = size of subtree
-				-if a = i - 1, return x's key
-				-if a >= i, recursivley compute ith order statistic at y  //left subtree is larger
-				-if a < i - 1, recurse on right subtree   		//left subtree too small
-					-recursivley compute (i-a-1)th order stat on right subtree */
+	/*-start at root, check size of left subtree
+		-if larger than requested ith order statistic, then the target MUST be in the right subtree
+			-because the smallest values by definition to the left of the root
+		-if smaller, target must exist within a left subtree at node whose size is > i
+	-subtract the subtree size + 1 (self) from i to identify how far to other side to go
+	-let a = size of subtree
+		-if a = i - 1, return x's key
+		-if a >= i, recursivley compute ith order statistic at y //left subtree is larger
+		-if a < i - 1, recurse on right subtree   		//left subtree too small
+			-recursivley compute (i-a-1)th order stat on right subtree */
 	select(i){
+		
+		let currNode = this.root;
+
+		console.log("i: " + i + ", leftnode size: " + currNode.left.size);
+		console.log("currNode: " + currNode.value, currNode.size);
+
+		if (currNode.left.size >= i){
+		
+			//let diff = i - (currNode.left.size + 1);
+			
+			currNode = currNode.left;
+			console.log("currNode: " + currNode.value, currNode.size);
+		}
+		
+		
 		
 	}
 	
@@ -494,6 +508,9 @@ console.log("minValue: " + bst.minValue());
 
 console.log("size: ");  
 console.log(bst.search(8).size);
+
+console.log("select: ");  
+bst.select(2);
 
 /* console.log("Getting Predecessor: ");
 console.log(bst.getPredecessor());  
