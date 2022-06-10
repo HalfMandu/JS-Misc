@@ -186,9 +186,7 @@ class BinarySearchTree {
 		
 	//Alternate recursive search and delete, takes a starting point and a target search value
 	searchAndRemove(root, value){
-		
-		//console.log("currRoot, value: " + root.value, value);
-		
+				
 		//base case -- the tree is empty
 		if (!root){
 			return root;
@@ -443,28 +441,95 @@ class BinarySearchTree {
 		-if a = i - 1, return x's key
 		-if a >= i, recursivley compute ith order statistic at y //left subtree is larger
 		-if a < i - 1, recurse on right subtree   		//left subtree too small
-			-recursivley compute (i-a-1)th order stat on right subtree */
-	select(i){
-		
-		let currNode = this.root;
-
-		console.log("i: " + i + ", leftnode size: " + currNode.left.size);
-		console.log("currNode: " + currNode.value, currNode.size);
-
-		if (currNode.left.size >= i){
-		
-			//let diff = i - (currNode.left.size + 1);
-			
-			currNode = currNode.left;
-			console.log("currNode: " + currNode.value, currNode.size);
-		}
-		
-		
-		
+			-recursivley compute (i-a-1)th order stat on right subtree 
+	x.size = x.left.size + x.right.size + 1
+	-While augmenting the tree, we should keep in mind, that we should be able to maintain the augmented information as well as do other operations like insertion, deletion, updating in O(lg n) time.
+	Since, we know that the value of x.left.size will give us the number of nodes which proceed x in the order traversal of the tree. Thus, x.left.size + 1 is the rank of x within the subtree rooted at x.
+	*/
+	select(i) {
+		 return this.selectRecursive(this.root, i).value;
 	}
 	
-	//given a key value, return number of keys in the tree <= that value
-	rank(){
+	//Recursive helper for select
+	selectRecursive(currNode, i) {   
+		
+		if (!currNode){ 
+			return null; 
+		}
+		
+		let leftSize = this.size(currNode.left);
+		
+		//if left subtree greater than i, left tree must encompass i...dig to the left
+		if (leftSize > i){
+			return this.selectRecursive(currNode.left,  i);
+		}
+		
+		//if left subtree smaller than i, right tree must encompass i...dig to the right
+		else if (leftSize < i) {
+			return this.selectRecursive(currNode.right, i-leftSize-1); 	//update the 2nd param
+		}
+		
+		else { 
+			return currNode;
+		}
+	}
+	
+	//Given a key value, return number of keys in the tree <= that value
+	rank(currNode = this.root, value) {
+	
+		let rank = 0;
+		
+		while (currNode) {
+			if (value < currNode.value){ 	//dig on left subtree
+				currNode = currNode.left;
+			}
+			else if (value > currNode.value) {
+				rank += 1 + this.size(currNode.left);
+				currNode = currNode.right;
+			}
+			else {
+			  return rank + this.size(currNode.left);
+			}
+		}
+		return null; 	//not found
+	}
+	
+	//Recursive implementation
+	rankRecursive(currNode = this.root, value) {
+        
+		if (!currNode){ 
+			return 0; 
+		}
+		
+        if (value < currNode.value) { 
+			return this.rankRecursive(currNode.left, value); 
+		}
+		
+        else if (value > currNode.value){
+			return 1 + this.size(currNode.left) + this.rankRecursive(currNode.right, value);
+		}
+        else {
+			return this.size(currNode.left);
+		}
+    }  
+	
+	//Size(x) = size(left(x)) + size(right(x)) + 1
+	size(node){
+		
+		if (!node){
+			return 0;
+		}
+		
+		let res = 1;
+		
+		if (node.left){
+			res += node.left.size;
+		}
+		if (node.right){
+			res += node.right.size;
+		}
+		
+		return res;
 		
 	}
 	
@@ -501,16 +566,24 @@ bst.insert(4);
 bst.insert(7);
 bst.insert(13);
 
-console.log("Getting min/max: ");
+/* console.log("Getting min/max: ");
 console.log("min: " + bst.getMin());  
 console.log("max: " + bst.getMax());  
-console.log("minValue: " + bst.minValue());  
+console.log("minValue: " + bst.minValue());   */
 
-console.log("size: ");  
-console.log(bst.search(8).size);
+/* console.log("size: ");  
+console.log(bst.search(8).size); */
 
-console.log("select: ");  
-bst.select(2);
+/* let i = 7;
+console.log("select order i: " + i);  
+//console.log(bst.select2(bst.root, i).value);
+console.log(bst.select(i-1)); */
+
+let r = 10;
+console.log("rank: " + r);  
+console.log(bst.rank(bst.root, r)); 
+console.log("rank recursive: " + r);  
+console.log(bst.rankRecursive(bst.root, r));
 
 /* console.log("Getting Predecessor: ");
 console.log(bst.getPredecessor());  
