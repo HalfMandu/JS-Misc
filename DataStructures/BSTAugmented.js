@@ -74,20 +74,19 @@ class BinarySearchTree {
 			//new value is greater than current spot, move to the left
             if (value < currNode.value){
                 if (!currNode.left){
-                    currNode.size++;			//one more node in the subtree
                     currNode.left = newNode;	//reached the bottom of the tree, add the new node
+                    currNode.size++;			//one more node in the subtree
 					return;
                 }
 				currNode.size++;
-				//currNode.size =+ currNode.left.size + currNode.right.size;
                 currNode = currNode.left;
             } 
 			
 			//new value is greater than current spot, move to the right
 			else {
                 if (!currNode.right){
-                    currNode.size++;
                     currNode.right = newNode;   
+                    currNode.size++;
                     return;
                 } 
 				currNode.size++;
@@ -488,7 +487,7 @@ class BinarySearchTree {
 				currNode = currNode.right;
 			}
 			else {
-			  return rank + this.size(currNode.left);
+				return rank + this.size(currNode.left);
 			}
 		}
 		return null; 	//not found
