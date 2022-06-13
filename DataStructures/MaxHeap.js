@@ -1,18 +1,14 @@
 /* 
-	Min Heap
+	Max Heap
 	Stephen Rinkus 
+
+	Modified MinHeap to flip numbers' signs before bubbling comparisons
 	
-			  (1)
-			/    \
-		 (2)     (4)
-		/  \     / 
-	  (5) (3)  (6)       
-	  
 	Insert - O(logn)
-	Extract-min - O(logn)
+	Extract-max - O(logn)
 */
 
-class MinHeap {
+class MaxHeap {
 
 	//Storing heap structure in an array
 	constructor(){
@@ -20,7 +16,7 @@ class MinHeap {
 	}
 	
 	//Insert an array of ints one at a time into Heap
-	buildMinHeap(){
+	buildMaxHeap(){
 		let values = [3, 1, 6, 5, 2, 4]   				    // 1,2,4,5,3,6
 		values.forEach(val => this.insert(Number(val)));
 	}
@@ -49,14 +45,14 @@ class MinHeap {
 		let parentIndex = Math.floor((index + 1) / 2) - 1; 
 		
 		//while the node still has parents which are greater, keep bubbling up
-		while(index > 0 && this.heap[parentIndex] > this.heap[index]){
+		while(index > 0 && -this.heap[parentIndex] > -this.heap[index]){
 			this.swap(index, parentIndex);
 			index = parentIndex;
 			parentIndex = Math.floor((index + 1) / 2) - 1;  
 		} 
 	}
 	
-	//Sink a node down...extractMin is followed by a bubbleDown, after last element is placed at top...
+	//Sink a node down...extractMax is followed by a bubbleDown, after last element is placed at top...
 	bubbleDown(index = 0){
 	
 		let swap = true;					//boolean swap status, so code knows when to exit loop
@@ -68,22 +64,23 @@ class MinHeap {
 						
 			swap = false;		//code will need to swap in order to re-enter loop				
 						
-			let min = index;
+			let max = index;
 			leftChildIndex = (2 * index) + 1;
 			rightChildIndex = (2 * index) + 2;
 			
-			if (leftChildIndex < length && this.heap[leftChildIndex] < this.heap[index]) {
-				min = leftChildIndex;
+			//flipping signs to re-use minHeap logic
+			if (leftChildIndex < length && -this.heap[leftChildIndex] < -this.heap[index]) {
+				max = leftChildIndex;
 			}
 
-			if (rightChildIndex < length && this.heap[rightChildIndex] < this.heap[min]){
-				min = rightChildIndex;	
+			if (rightChildIndex < length && -this.heap[rightChildIndex] < -this.heap[max]){
+				max = rightChildIndex;	
 			}
 						
-			//if new min was detected, do the needed swap
-			if (min != index) {
-				this.swap(index, min);	//swap heap spots
-				index = min;			//advnace downwards
+			//if new max was detected, do the needed swap
+			if (max != index) {
+				this.swap(index, max);	//swap heap spots
+				index = max;			//advnace downwards
 				swap = true;
 			} 
 		}
@@ -125,35 +122,22 @@ class MinHeap {
 		
 	}
 	
-	//Return the minimum value within the heap...the min is the first element in the array
-	getMin(){
+	//Return the maximum value within the heap...the max is the first element in the array
+	getMax(){
 		if (!this.isEmpty()) {
 			return this.heap[0];
 		}
 		return null;
 	}
 	
-	//Return the highest value within the heap
-	getMax(){
-		if (!this.isEmpty()) {
-			return Math.max(...this.heap);
-		}
-		return null;
-	}
-	
-	//Remove and return the minimum element in the heap, and re-settle the remaining heap to valid state 
-	extractMin(){
+	//Remove and return the maximum element in the heap, and re-settle the remaining heap to valid state 
+	extractMax(){
 		
-		const min = this.heap[0];			//minimum value in heap, to be returned at the end
+		const max = this.heap[0];			//maximum value in heap, to be returned at the end
 		this.heap[0] = this.heap.pop();		//override first element with last
 		this.bubbleDown();					//push the new-found root node downwards till its in place
 		
-		return min;
-	}
-	
-	//Remove and return the maximum element in the heap
-	extractMax(){
-		return this.deleteValue(this.getMax());
+		return max;
 	}
 	
 	//Decrease value of key at index (new val should be smaller)
@@ -185,18 +169,6 @@ class MinHeap {
 		return delVal;
 	}
 	
-	//Alternative delete approach
-	deleteKey2(index){
-	
-		//plummet a key's value, then bubble it up to the top of the tree, then extract min
-		let delValue = this.heap[index];
-		this.heap[index] = Number.NEGATIVE_INFINITY;
-		this.bubbleUp(index);
-		this.extractMin();
-		
-		return delValue;
-	}	
-	
 	//Find and delete a given value, then restore heap property (assuming no dupes)
 	deleteValue(val){
 		
@@ -217,60 +189,20 @@ class MinHeap {
 	
 }
 
-export { MinHeap };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Driver
-		
-/* 	Min Heap
- *              (1)
- *            /    \
- *         (2)     (4)
- *        /  \     / 
- *      (5) (3)  (6)       
- */ 
-//console.log("Starting up MinHeap...");
 
-const minHeap = new MinHeap();
-minHeap.buildMinHeap();
-console.log("Heap : " + minHeap.heap);
+//console.log("Starting up MaxHeap...");
 
-/* console.log("Min: " + minHeap.getMin());
-console.log("Max: " + minHeap.getMax()); 
-console.log("isEmpty: " + minHeap.isEmpty()); */
+/* const maxHeap = new MaxHeap();
+maxHeap.buildMaxHeap();
+console.log("MaxHeap : " + maxHeap.heap);
 
-/* let searchVal = 15;
-console.log("Searching for " + searchVal + "...");
-let searchRes = minHeap.search(searchVal);
-console.log("searchRes1: " + searchRes);
-searchRes = minHeap.search(searchVal);
-console.log("searchRes2: " + searchRes); */
-
-/* console.log("Decreasing key...");
-minHeap.decreaseKey(4, 1);
-console.log("Heap : " + minHeap.heap); */
-
-console.log("Extracting min: ");
-console.log(minHeap.extractMin());
-console.log("Heap : " + minHeap.heap); 
-
-/* console.log("Extracting max...");
-console.log(minHeap.extractMax());
-console.log("Heap : " + minHeap.heap);  */
-
-/* let key = 1;
-console.log("Deleting key: " + key + "...");
-console.log("Deleted: " + minHeap.deleteKey(key));
-console.log("Heap : " + minHeap.heap); 
-
-let val = 4;
-console.log("Deleting value " + val + "...");
-let delRes = minHeap.deleteValue(val)
-console.log("delRes: " + delRes); 
-console.log("Heap : " + minHeap.heap);  */
-
- 
-//console.log("Final heap : " + minHeap.heap);
+console.log("Extracting max: ");
+console.log(maxHeap.extractMax());
+console.log("Heap : " + maxHeap.heap); 
+ */
 
 
 
