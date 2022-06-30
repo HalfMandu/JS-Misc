@@ -1,5 +1,6 @@
 /*
 	swap(arr, i, j)
+	isPrime(number, index, array)
 	parseTxtFile async (csvFile)
 	getMedian(arr, first, mid, last)
 	getBoundedRandomNumber(min, max) 
@@ -16,6 +17,20 @@ const swap = (arr, i, j) => {
     arr[i] = arr[j];
     arr[j] = temp;
 };
+
+//Boolean check if prime number in the array, or return undefined if none
+const isPrime(number, index, array) {
+	let start = 2;
+	while (start <= Math.sqrt(number)) {
+		if (number % start++ < 1) {
+			return false;
+		}
+	}
+	return number > 1;
+}
+//console.log([4, 6, 8, 12].find(isPrime)); // undefined, not found
+//console.log([4, 5, 8, 12].find(isPrime)); // 5
+
 
 //Convert txt file to array
 const parseTxtFile = async (csvFile) => {
